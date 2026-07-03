@@ -7,7 +7,6 @@ struct Sventa {
     int num_operacion;
     char producto[50];       
     int cantidad;
-    float precio_unitario;
     char fecha[15];         
     
     struct Sventa* prventas; 
@@ -91,12 +90,11 @@ void GuardarProductos(Sproducto *lista){
 		return;
 	}
 	while(lista) {
-		fprintf(f, "%d|%s|%s|%s|%f\n",
+		fprintf(f, "%d|%s|%s|%s\n",
 			lista->codigo,
 			lista->nombre,
 			lista->marca,
-			lista->descripcion,
-			lista->precio);
+			lista->descripcion);
 		lista=lista->psig;
 	}
 	fclose(f);
@@ -107,12 +105,11 @@ void CargarProductos(Sproducto **lista) {
 	if(!f) {return;}
 	while(1) {
 		Sproducto *nuevo = new Sproducto;
-		if (fscanf(f, "%d|%29[^|]|%29[^|]|%99[^|]|%f\n",
+		if (fscanf(f, "%d|%29[^|]|%29[^|]|%99[^\n]\n",
 			&nuevo->codigo,
 			nuevo->nombre,
 			nuevo->marca,
-			nuevo->descripcion,
-			&nuevo->precio) == 5) {
+			nuevo->descripcion) == 4) {
 			nuevo->psig = *lista;
 			*lista = nuevo;
 		}
@@ -223,12 +220,8 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
 
 void MostrarAsociado(Sasociado *p){
     if(!p) return;
-    printf("\n");
-    printf("Nombre: %s\n", p->nombre);
-    printf("Direccion: %s\n", p->direccion);
-    printf("Numero de telefono: %d\n", p->telefono);
-    printf("Codigo del producto: %d\n", p->codigo);
-    printf("\n");
+    printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+    p->nombre, p->direccion, p->telefono, p->codigo);
 }
 
 void ConsultarCodigoAsociado(Sasociado *lista, int n){
@@ -368,12 +361,8 @@ void EliminarPorCodigoAsociado(Sasociado **a, int n){
 
 void MostrarAsociados(Sasociado *lista){
     while(lista){
-        printf("\n");
-        printf("Nombre: %s\n", lista->nombre);
-        printf("Direccion: %s\n", lista->direccion);
-        printf("Numero de telefono: %d\n", lista->telefono);
-        printf("Codigo del producto: %d\n", lista->codigo);
-        printf("\n");
+        printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+        lista->nombre, lista->direccion, lista->telefono, lista->codigo);
         lista=lista->pnext;
     }
 }
@@ -384,7 +373,6 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     char marca[100];
     char descripcion[150];
     int codigo;
-    float precio;
 	int entrada_valida;
 
     //Abro el archivo
@@ -412,30 +400,6 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     }
     strcpy(nuevo->descripcion, descripcion);
 
-    printf("Ingrese el precio: \n");
-    fflush(stdin);scanf("%f", &precio);fflush(stdin);
-    while(precio<=0){
-        printf("Por favor introduzca un numero mayor a 0: \n");
-        fflush(stdin);scanf("%f", &precio);fflush(stdin);
-    }
-
-//entrada_valida = scanf("%f", &precio);
-
-
-//while (entrada_valida != 1 || precio <= 0) {
-    
-  //  int c;
-    //while ((c = getchar()) != '\n' && c != EOF);
-
-
-    //printf("Por favor introduzca un numero valido mayor a 0: \n");
-	//printf("El precio es: %.2f\n", nuevo->precio);
-    //entrada_valida = scanf("%f", &precio);
-
-
-
-    nuevo->precio=precio;
-
     printf("Ingrese el codigo del producto: ");
     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
     while(!(BuscarCodigoProducto(ListaProductos, codigo))){
@@ -456,26 +420,16 @@ void AgregarProductos(Sproducto **lista, Sproducto** producto){
 
 void MostrarProductos(Sproducto *lista){
     while(lista){
-        printf("\n");
-        printf("Nombre: %s\n", lista->nombre);
-        printf("Nombre del marca: %s\n", lista->marca);
-        printf("Descripcion del producto: %s\n", lista->descripcion);
-        printf("Precio del producto: %f\n", lista->precio);
-        printf("Codigo del producto: %d\n", lista->codigo);
-        printf("\n");
+        printf("Nombre: %s | Nombre de la marca: %s | Descripcion del producto: %s | Codigo del producto: %d\n", 
+        lista->nombre, lista->marca, lista->descripcion, lista->codigo);
         lista=lista->psig;
     }
 }
 
 void MostrarProducto(Sproducto *p){
     if(!p) return;
-    printf("\n");
-    printf("Nombre: %s\n", p->nombre);
-    printf("Nombre del marca: %s\n", p->marca);
-    printf("Descripcion del producto: %s\n", p->descripcion);
-    printf("Precio del producto: %f\n", p->precio);
-    printf("Codigo del producto: %d\n", p->codigo);
-    printf("\n");
+        printf("Nombre: %s | Nombre de la marca: %s | Descripcion del producto: %s | Codigo del producto: %d\n", 
+        p->nombre, p->marca, p->descripcion, p->codigo);
 }
 
 void ConsultarCodigo(Sproducto *lista, int n){
