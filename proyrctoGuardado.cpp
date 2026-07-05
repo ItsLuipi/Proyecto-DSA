@@ -77,6 +77,18 @@ void ToLower(const char origen[], char destino[]) {
     destino[i] = '\0';
 }
 
+bool IsNumeric(const char origen []){
+    int i = 0;
+    while (origen[i] != '\0'){
+        char c = origen[i];
+        if(!isdigit(c)){
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
 static int ContainsIgnoreCase(const char texto[], const char patron[]) {
     char textoMinusculas[200];
     char patronMinusculas[200];
