@@ -18,7 +18,7 @@ struct Sasociado {
     int codigo;              
     char nombre[50];
     char direccion[100];
-    int telefono; 
+    char telefono[21]; 
     
     struct Sasociado* pnext; 
     struct Sventa* pventas;  
@@ -142,7 +142,7 @@ void GuardarAsociados(Sasociado *lista){
 	return;
 	}
 	while (lista){
-	fprintf(f,  "%d|%s|%s|%d\n",
+	fprintf(f,  "%d|%s|%s|%s\n",
 		lista->codigo,
 		lista->nombre,
 		lista->direccion,
@@ -158,7 +158,7 @@ void CargarAsociados(Sasociado **lista) {
     Sasociado *nuevo;
     while (1) {
         nuevo = new Sasociado;
-        if (fscanf(f, "%d|%49[^|]|%99[^|]|%d\n",
+        if (fscanf(f, "%d|%49[^|]|%99[^|]|%20[^\n]\n",
             &nuevo->codigo,
             nuevo->nombre,
             nuevo->direccion,
@@ -185,7 +185,7 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     Sasociado *nuevo=new Sasociado;
     char nombre[100];
     char direccion[150];
-    int telefono;
+    char telefono[21];
     int codigo;
 	int valido=0;
     
@@ -219,8 +219,16 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     strcpy(nuevo->direccion, direccion);
 
     printf("Ingrese el numero de telefono del Asociado: ");
-    fflush(stdin);scanf("%d", &telefono);fflush(stdin);
-    nuevo->telefono=telefono;
+    fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
+    while(strlen(telefono)>sizeof(nuevo->telefono)){
+        printf("Se excede el numero de telefono.");
+        fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
+    }
+    while(!IsNumeric(telefono)){
+        printf("El numero de telefono no es valido, por favor revise si hay una letra. ");
+        fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
+    }
+    strcpy(nuevo->telefono, telefono);
 
     nuevo->pnext=NULL;
     nuevo->pventas=NULL;
@@ -229,7 +237,7 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
 
 void MostrarAsociado(Sasociado *p){
     if(!p) return;
-    printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+    printf("Nombre: %s | Direccion: %s | Numero de telefono: %s | Codigo del producto: %d\n", 
     p->nombre, p->direccion, p->telefono, p->codigo);
 }
 
@@ -321,11 +329,19 @@ void ModificarCodigoAsociado(Sasociado *lista){
             printf("El codigo fue cambiado con exito!");
             break;
         case 3:
-            printf("Ingrese el numero de telefono: \n");
-            scanf(" %d", &CambioNum);fflush(stdin);
-            lista->telefono=CambioNum;
-            fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("Ingrese el numero de telefono del Asociado: ");
+            fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            while(strlen(Cambio)>sizeof(lista->telefono)){
+                printf("Se excede el numero de telefono.");
+                fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            }
+
+            while(!IsNumeric(Cambio)){
+                printf("El numero de telefono no es valido, por favor revise si hay una letra. ");
+                fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            }
+
+            strcpy(lista->telefono, Cambio);
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
@@ -370,7 +386,7 @@ void EliminarPorCodigoAsociado(Sasociado **a, int n){
 
 void MostrarAsociados(Sasociado *lista){
     while(lista){
-        printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+        printf("Nombre: %s | Direccion: %s | Numero de telefono: %s | Codigo del producto: %d\n", 
         lista->nombre, lista->direccion, lista->telefono, lista->codigo);
         lista=lista->pnext;
     }
