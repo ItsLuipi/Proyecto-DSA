@@ -3,6 +3,8 @@
 using namespace std;
 //LUIS LARA Y GABRIEL FREAY
 
+
+//SIGMA SIGMA BOY 
 struct Sventa {
     int num_operacion;
     char producto[50];       
@@ -175,6 +177,19 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     int codigo;
 	int valido=0;
     
+    printf("Ingrese el codigo del Asociado: ");
+    fflush(stdin);scanf("%d", &codigo);
+    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+
+    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+    nuevo->codigo=codigo;
+
     printf("Ingrese el nombre del Asociado (No puede ser mayor de 30 caracteres): \n");
     fflush(stdin);fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
     while(strlen(nombre)>sizeof(nuevo->nombre)){
@@ -194,24 +209,6 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     printf("Ingrese el numero de telefono del Asociado: ");
     fflush(stdin);scanf("%d", &telefono);fflush(stdin);
     nuevo->telefono=telefono;
-
-    printf("Ingrese el codigo del Asociado: ");
-    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-	while(!valido){
-		if(scanf("%d", &codigo)==1){
-			valido=1;
-		}
-		else{
-			printf("Eso no es un entero, intente nuevamente:");
-			scanf("%d", &codigo);fflush(stdin);
-		}
-	}
-
-    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    }
-    nuevo->codigo=codigo;
 
     nuevo->pnext=NULL;
     nuevo->pventas=NULL;
@@ -367,7 +364,7 @@ void MostrarAsociados(Sasociado *lista){
     }
 }
 //============================PRODUCTO============================
-Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO TIENE QUE SER LA LISTA DE LOS PRODUCTOS
+Sproducto* NuevoProducto(Sproducto *ListaProductos){ 
     Sproducto *nuevo=new Sproducto;
     char temp[100];
     char marca[100];
@@ -375,9 +372,15 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     int codigo;
 	int entrada_valida;
 
-    //Abro el archivo
+    printf("Ingrese el codigo del producto: ");
+    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    while(!(BuscarCodigoProducto(ListaProductos, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+
     printf("Ingrese el nombre (No puede ser mayor de 30 caracteres): \n");
-    fflush(stdin);fflush(stdin);scanf(" %99[^\n]", temp);  fflush(stdin); //Importante el fflush asi limpio buffer
+    fflush(stdin);fflush(stdin);scanf(" %99[^\n]", temp);  fflush(stdin); 
     while (strlen(temp)>=sizeof(nuevo->nombre)){
         printf("El nombre excede los 30 caracteres, por favor introduzca algo mas corto. \n");
         fflush(stdin);scanf(" %99[^\n]", temp);
@@ -400,16 +403,10 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     }
     strcpy(nuevo->descripcion, descripcion);
 
-    printf("Ingrese el codigo del producto: ");
-    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    while(!(BuscarCodigoProducto(ListaProductos, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    }
     nuevo->codigo=codigo;
     nuevo->psig=NULL;
     return nuevo;
-    //Cierro archivo (Asi en todas las funciones)
+    
 }
 
 void AgregarProductos(Sproducto **lista, Sproducto** producto){
@@ -743,9 +740,3 @@ int main(){
     }
     return 0;
 }
-//Output, agrego la libreria de archivo.
-//funciones de validacion.
-//std:ofstrean archivo(Nombre del archivo)
-//if nombre.is_open()
-//archivo<<
-//archivo.close
