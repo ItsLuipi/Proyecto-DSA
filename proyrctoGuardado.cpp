@@ -189,15 +189,20 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
 	int valido=0;
     
     printf("Ingrese el codigo del Asociado: ");
-    fflush(stdin);
-    while(scanf("%d", &codigo) != 1){
-        printf("El codigo es invalido, porfavor intente de nuevo. \n");
-        while (getchar() != '\n');
-        ("%d", &codigo);
-    }
-    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    
+    while (true) {
+        int exito = scanf("%d", &codigo);
+        if (exito != 1) {
+            printf("El codigo es invalido, por favor intente de nuevo: ");
+            while (getchar() != '\n');
+            continue;
+        }
+        
+        if (!BuscarCodigoAsociado(ListaAsociados, codigo)) {
+            printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+            continue; 
+        }
+        break; 
     }
 
     while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
@@ -354,16 +359,22 @@ void ModificarCodigoAsociado(Sasociado *lista){
             system("pause");
             break;
         case 4:
-            printf("Ingrese el codigo del Asociado: ");
-            while(scanf("%d", &CambioNum) != 1){
-                printf("El codigo es invalido, porfavor intente de nuevo. \n");
-                while (getchar() != '\n');
-                ("%d", &CambioNum);
-            }
-            while(!(BuscarCodigoAsociado(lista, CambioNum))){
-                printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-                fflush(stdin);scanf("%d", &CambioNum);fflush(stdin);
-            }
+            printf("Ingrese el nuevo codigo: \n");
+            while (true) {
+                int exito = scanf("%d", &CambioNum);
+                if (exito != 1) {
+                    printf("El codigo es invalido, por favor intente de nuevo: ");
+                    while (getchar() != '\n');
+                    continue;
+                }
+        
+                if (!BuscarCodigoAsociado(lista, CambioNum)) {
+                    printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+                    continue; 
+                }
+                break; 
+                }
+
             lista->codigo=CambioNum;
             printf("\n");
             printf("Codigo cambiado con exito!");
@@ -419,15 +430,20 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){
 	int entrada_valida;
 
     printf("Ingrese el codigo del producto: ");
-    while(scanf("%d", &codigo) != 1){
-        printf("El codigo es invalido, porfavor intente de nuevo. \n");
-        while (getchar() != '\n');
-        ("%d", &codigo);
-    }
-    while(!(BuscarCodigoProducto(ListaProductos, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    }
+    while (true) {
+        int exito = scanf("%d", &codigo);
+        if (exito != 1) {
+            printf("El codigo es invalido, por favor intente de nuevo: ");
+            while (getchar() != '\n');
+            continue;
+        }
+        
+        if (!BuscarCodigoProducto(ListaProductos, codigo)) {
+            printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+            continue; 
+        }
+        break; 
+        }
 
     printf("Ingrese el nombre (No puede ser mayor de 30 caracteres): \n");
     fflush(stdin);fflush(stdin);scanf(" %99[^\n]", temp);  fflush(stdin); 
@@ -584,17 +600,21 @@ void ModificarCodigo(Sproducto *lista){
             system("pause");
             break;
         case 4:
-            printf("Ingrese el codigo del Asociado: ");
-            while(scanf("%d", &mod) != 1){
-                printf("El codigo es invalido, porfavor intente de nuevo. \n");
-                while (getchar() != '\n');
-                ("%d", &mod);
-            }
-
-            while(!(BuscarCodigoProducto(lista, mod))){
-                printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-                fflush(stdin);scanf("%d", &mod);fflush(stdin);
-            }
+            printf("Introduzca el nuevo codigo \n");
+            while (true) {
+                int exito = scanf("%d", &mod);
+                if (exito != 1) {
+                    printf("El codigo es invalido, por favor intente de nuevo: ");
+                    while (getchar() != '\n');
+                    continue;
+                }
+        
+                if (!BuscarCodigoProducto(lista, mod)) {
+                    printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+                    continue; 
+                }
+                break; 
+                }
             lista->codigo=mod;
             printf("\n");
             system("pause");
