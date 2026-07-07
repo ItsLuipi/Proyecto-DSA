@@ -190,7 +190,12 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
 	int valido=0;
     
     printf("Ingrese el codigo del Asociado: ");
-    fflush(stdin);scanf("%d", &codigo);
+    fflush(stdin);
+    while(scanf("%d", &codigo) != 1){
+        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+        while (getchar() != '\n');
+        ("%d", &codigo);
+    }
     while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
         printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
         fflush(stdin);scanf("%d", &codigo);fflush(stdin);
@@ -345,12 +350,21 @@ void ModificarCodigoAsociado(Sasociado *lista){
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
-            scanf("%d", &CambioNum);fflush(stdin);
+            while(scanf("%d", &CambioNum) != 1){
+                printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                while (getchar() != '\n');
+                ("%d", &CambioNum);
+            }
             while(!(BuscarCodigoAsociado(lista, CambioNum))){
                 printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                 fflush(stdin);scanf("%d", &CambioNum);fflush(stdin);
             }
             lista->codigo=CambioNum;
+            printf("\n");
+            printf("Codigo cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
@@ -401,7 +415,11 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){
 	int entrada_valida;
 
     printf("Ingrese el codigo del producto: ");
-    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    while(scanf("%d", &codigo) != 1){
+        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+        while (getchar() != '\n');
+        ("%d", &codigo);
+    }
     while(!(BuscarCodigoProducto(ListaProductos, codigo))){
         printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
         fflush(stdin);scanf("%d", &codigo);fflush(stdin);
@@ -521,7 +539,7 @@ void ModificarCodigo(Sproducto *lista){
     printf("3- Descripcion. \n");
     printf("4- Precio. \n");
     printf("5- Codigo. \n");
-    fflush(stdin);scanf("%d", &menu);fflush(stdin);
+    fflush(stdin);scanf("%d", &menu);fflush(stdin); //letras
     switch(menu){
         case 1:
             printf("Ingrese el nombre: \n");
@@ -646,7 +664,7 @@ int main(){
         printf("1.1.1.3 Consultar por nombre \n");
         printf("1.1.1.4 Modificar por codigo \n");
         printf("1.1.1.5 Eliminar por codigo \n");
-        printf("1.1.1.6 Mostrar todos los productos \n");
+        printf("1.1.1.6 Mostrar todos los asociados \n");
         printf("1.1.1.0 Salir \n");
         fflush(stdin);
         if (scanf("%d", &option) != 1) {
