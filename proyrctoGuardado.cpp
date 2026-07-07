@@ -26,7 +26,6 @@ struct Sasociado {
 
 struct Sproducto {
     int codigo;
-    float precio;
     char nombre[30];
     char marca[30];
     char descripcion[100];
@@ -323,7 +322,6 @@ void ModificarCodigoAsociado(Sasociado *lista){
             printf("El codigo fue cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarAsociados(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -337,7 +335,6 @@ void ModificarCodigoAsociado(Sasociado *lista){
             printf("El codigo fue cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarAsociados(lista);
             break;
         case 3:
             printf("Ingrese el numero de telefono del Asociado: ");
@@ -355,7 +352,6 @@ void ModificarCodigoAsociado(Sasociado *lista){
             strcpy(lista->telefono, Cambio);
             printf("Codigo cambiado con exito! \n");
             system("pause");
-            GuardarAsociados(lista);
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
@@ -373,7 +369,6 @@ void ModificarCodigoAsociado(Sasociado *lista){
             printf("Codigo cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarAsociados(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
@@ -546,8 +541,7 @@ void ModificarCodigo(Sproducto *lista){
     printf("1- Nombre. \n");
     printf("2- Marca. \n");
     printf("3- Descripcion. \n");
-    printf("4- Precio. \n");
-    printf("5- Codigo. \n");
+    printf("4- Codigo. \n");
     fflush(stdin);scanf("%d", &menu);fflush(stdin); //letras
     switch(menu){
         case 1:
@@ -562,7 +556,6 @@ void ModificarCodigo(Sproducto *lista){
             printf("El codigo fue cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarProductos(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -576,7 +569,6 @@ void ModificarCodigo(Sproducto *lista){
             printf("El codigo fue cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarProductos(lista);
             break;
         case 3:
             printf("Ingrese la descripcion: \n");
@@ -590,18 +582,8 @@ void ModificarCodigo(Sproducto *lista){
             printf("El codigo fue cambiado con exito!");
             printf("\n");
             system("pause");
-            GuardarProductos(lista);
             break;
         case 4:
-            printf("Ingrese el precio: \n");
-            fflush(stdin);scanf("%f", &mod);fflush(stdin);
-            while(mod<=0){
-                printf("Por favor introduzca un numero mayor a 0: \n");
-                fflush(stdin);scanf("%f", &mod);fflush(stdin);
-            }
-            lista->precio=mod;
-            break;
-        case 5:
             printf("Ingrese el codigo del Asociado: ");
             scanf("%d", &mod);fflush(stdin);
             while(!(BuscarCodigoProducto(lista, mod))){
@@ -611,7 +593,6 @@ void ModificarCodigo(Sproducto *lista){
             lista->codigo=mod;
             printf("\n");
             system("pause");
-            GuardarProductos(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
@@ -735,6 +716,7 @@ int main(){
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
                     if(pruebasociado != NULL){
                         ModificarCodigoAsociado(pruebasociado);
+                        GuardarAsociados(ListaAsociados);
                     } 
                     else {
                         printf("No se encontro el producto con ese codigo.\n");
@@ -826,14 +808,16 @@ int main(){
 
                 case 4: {
                     system("cls");
-                    printf("Que codigo deseas modificar");
+                    printf("Que codigo deseas modificar: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
                         ModificarCodigo(prueba);
+                        GuardarProductos(ListaProductos);
                     } 
                     else {
                         printf("No se encontro el producto con ese codigo.\n");
+                        system("pause");
                     }
                     break;
                     
