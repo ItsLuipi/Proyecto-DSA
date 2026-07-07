@@ -3,6 +3,8 @@
 using namespace std;
 //LUIS LARA Y GABRIEL FREAY
 
+
+//SIGMA SIGMA BOY 
 struct Sventa {
     int num_operacion;
     char producto[50];       
@@ -16,7 +18,7 @@ struct Sasociado {
     int codigo;              
     char nombre[50];
     char direccion[100];
-    int telefono; 
+    char telefono[21]; 
     
     struct Sasociado* pnext; 
     struct Sventa* pventas;  
@@ -75,6 +77,18 @@ void ToLower(const char origen[], char destino[]) {
     destino[i] = '\0';
 }
 
+bool IsNumeric(const char origen []){
+    int i = 0;
+    while (origen[i] != '\0'){
+        char c = origen[i];
+        if(!isdigit(c)){
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
 static int ContainsIgnoreCase(const char texto[], const char patron[]) {
     char textoMinusculas[200];
     char patronMinusculas[200];
@@ -128,7 +142,7 @@ void GuardarAsociados(Sasociado *lista){
 	return;
 	}
 	while (lista){
-	fprintf(f,  "%d|%s|%s|%d\n",
+	fprintf(f,  "%d|%s|%s|%s\n",
 		lista->codigo,
 		lista->nombre,
 		lista->direccion,
@@ -144,7 +158,7 @@ void CargarAsociados(Sasociado **lista) {
     Sasociado *nuevo;
     while (1) {
         nuevo = new Sasociado;
-        if (fscanf(f, "%d|%49[^|]|%99[^|]|%d\n",
+        if (fscanf(f, "%d|%49[^|]|%99[^|]|%20[^\n]\n",
             &nuevo->codigo,
             nuevo->nombre,
             nuevo->direccion,
@@ -171,10 +185,28 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     Sasociado *nuevo=new Sasociado;
     char nombre[100];
     char direccion[150];
-    int telefono;
+    char telefono[21];
     int codigo;
 	int valido=0;
     
+    printf("Ingrese el codigo del Asociado: ");
+    fflush(stdin);
+    while(scanf("%d", &codigo) != 1){
+        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+        while (getchar() != '\n');
+        ("%d", &codigo);
+    }
+    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+
+    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+    nuevo->codigo=codigo;
+
     printf("Ingrese el nombre del Asociado (No puede ser mayor de 30 caracteres): \n");
     fflush(stdin);fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
     while(strlen(nombre)>sizeof(nuevo->nombre)){
@@ -192,26 +224,16 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
     strcpy(nuevo->direccion, direccion);
 
     printf("Ingrese el numero de telefono del Asociado: ");
-    fflush(stdin);scanf("%d", &telefono);fflush(stdin);
-    nuevo->telefono=telefono;
-
-    printf("Ingrese el codigo del Asociado: ");
-    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-	while(!valido){
-		if(scanf("%d", &codigo)==1){
-			valido=1;
-		}
-		else{
-			printf("Eso no es un entero, intente nuevamente:");
-			scanf("%d", &codigo);fflush(stdin);
-		}
-	}
-
-    while(!(BuscarCodigoAsociado(ListaAsociados, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
+    while(strlen(telefono)>sizeof(nuevo->telefono)){
+        printf("Se excede el numero de telefono.");
+        fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
     }
-    nuevo->codigo=codigo;
+    while(!IsNumeric(telefono)){
+        printf("El numero de telefono no es valido, por favor revise si hay una letra. ");
+        fflush(stdin);scanf(" %20[^\n]", telefono);fflush(stdin);
+    }
+    strcpy(nuevo->telefono, telefono);
 
     nuevo->pnext=NULL;
     nuevo->pventas=NULL;
@@ -220,7 +242,7 @@ Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
 
 void MostrarAsociado(Sasociado *p){
     if(!p) return;
-    printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+    printf("Nombre: %s | Direccion: %s | Numero de telefono: %s | Codigo del producto: %d\n", 
     p->nombre, p->direccion, p->telefono, p->codigo);
 }
 
@@ -299,6 +321,9 @@ void ModificarCodigoAsociado(Sasociado *lista){
             strcpy(lista->nombre, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -310,22 +335,45 @@ void ModificarCodigoAsociado(Sasociado *lista){
             strcpy(lista->direccion, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 3:
-            printf("Ingrese el numero de telefono: \n");
-            scanf(" %d", &CambioNum);fflush(stdin);
-            lista->telefono=CambioNum;
-            fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("Ingrese el numero de telefono del Asociado: ");
+            fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            while(strlen(Cambio)>sizeof(lista->telefono)){
+                printf("Se excede el numero de telefono.");
+                fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            }
+
+            while(!IsNumeric(Cambio)){
+                printf("El numero de telefono no es valido, por favor revise si hay una letra. ");
+                fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
+            }
+
+            strcpy(lista->telefono, Cambio);
+            printf("Codigo cambiado con exito! \n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
-            scanf("%d", &CambioNum);fflush(stdin);
+            while(scanf("%d", &CambioNum) != 1){
+                printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                while (getchar() != '\n');
+                ("%d", &CambioNum);
+            }
             while(!(BuscarCodigoAsociado(lista, CambioNum))){
                 printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                 fflush(stdin);scanf("%d", &CambioNum);fflush(stdin);
             }
             lista->codigo=CambioNum;
+            printf("\n");
+            printf("Codigo cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
@@ -361,13 +409,13 @@ void EliminarPorCodigoAsociado(Sasociado **a, int n){
 
 void MostrarAsociados(Sasociado *lista){
     while(lista){
-        printf("Nombre: %s | Direccion: %s | Numero de telefono: %d | Codigo del producto: %d\n", 
+        printf("Nombre: %s | Direccion: %s | Numero de telefono: %s | Codigo del producto: %d\n", 
         lista->nombre, lista->direccion, lista->telefono, lista->codigo);
         lista=lista->pnext;
     }
 }
 //============================PRODUCTO============================
-Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO TIENE QUE SER LA LISTA DE LOS PRODUCTOS
+Sproducto* NuevoProducto(Sproducto *ListaProductos){ 
     Sproducto *nuevo=new Sproducto;
     char temp[100];
     char marca[100];
@@ -375,9 +423,19 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     int codigo;
 	int entrada_valida;
 
-    //Abro el archivo
+    printf("Ingrese el codigo del producto: ");
+    while(scanf("%d", &codigo) != 1){
+        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+        while (getchar() != '\n');
+        ("%d", &codigo);
+    }
+    while(!(BuscarCodigoProducto(ListaProductos, codigo))){
+        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
+        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+    }
+
     printf("Ingrese el nombre (No puede ser mayor de 30 caracteres): \n");
-    fflush(stdin);fflush(stdin);scanf(" %99[^\n]", temp);  fflush(stdin); //Importante el fflush asi limpio buffer
+    fflush(stdin);fflush(stdin);scanf(" %99[^\n]", temp);  fflush(stdin); 
     while (strlen(temp)>=sizeof(nuevo->nombre)){
         printf("El nombre excede los 30 caracteres, por favor introduzca algo mas corto. \n");
         fflush(stdin);scanf(" %99[^\n]", temp);
@@ -400,16 +458,10 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){ //AHORA EL NUEVO PARAMETRO 
     }
     strcpy(nuevo->descripcion, descripcion);
 
-    printf("Ingrese el codigo del producto: ");
-    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    while(!(BuscarCodigoProducto(ListaProductos, codigo))){
-        printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
-        fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-    }
     nuevo->codigo=codigo;
     nuevo->psig=NULL;
     return nuevo;
-    //Cierro archivo (Asi en todas las funciones)
+    
 }
 
 void AgregarProductos(Sproducto **lista, Sproducto** producto){
@@ -496,7 +548,7 @@ void ModificarCodigo(Sproducto *lista){
     printf("3- Descripcion. \n");
     printf("4- Precio. \n");
     printf("5- Codigo. \n");
-    fflush(stdin);scanf("%d", &menu);fflush(stdin);
+    fflush(stdin);scanf("%d", &menu);fflush(stdin); //letras
     switch(menu){
         case 1:
             printf("Ingrese el nombre: \n");
@@ -508,6 +560,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->nombre, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -519,6 +574,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->marca, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 3:
             printf("Ingrese la descripcion: \n");
@@ -530,6 +588,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->descripcion, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 4:
             printf("Ingrese el precio: \n");
@@ -539,7 +600,6 @@ void ModificarCodigo(Sproducto *lista){
                 fflush(stdin);scanf("%f", &mod);fflush(stdin);
             }
             lista->precio=mod;
-        //Agregar case 5 modificar codigo
             break;
         case 5:
             printf("Ingrese el codigo del Asociado: ");
@@ -549,6 +609,9 @@ void ModificarCodigo(Sproducto *lista){
                 fflush(stdin);scanf("%d", &mod);fflush(stdin);
             }
             lista->codigo=mod;
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
@@ -574,7 +637,7 @@ void EliminarPorCodigo(Sproducto **a, int n){
                 t=aux->psig;
                 aux->psig=t->psig;
                 delete t;
-                printf("El codigo fue cambiado con exito!");
+                printf("El codigo fue eliminado con exito!");
             }
             else{
                 printf("El codigo no esta en la lista");
@@ -594,41 +657,66 @@ int main(){
     Sasociado* pruebasociado;
 	CargarProductos(&ListaProductos);
 	CargarAsociados(&ListaAsociados);
-    while (menu!=0){  
+    while (menu!=0){
+    system("cls");
     printf("\n\n\t\tSistema de ventas DirVen\n\n");  
     printf("1. Asociados \n");  
     printf("2. Productos \n"); 
     printf("3. Ventas \n");  
     printf("\n0. Salir\n");  
-    fflush(stdin);scanf("%d", &menu);fflush(stdin);  
+    if (scanf("%d", &menu) != 1) {
+            menu = -1; 
+    }
+    while (getchar() != '\n');
+//======================================MENU ASOCIADOS======================================
     switch (menu){
-        //ASOCIADOS
+        case 0: {
+            system("cls");
+            printf("Saliendo, hasta luego! \n");
+            system("pause");
+            return 0;
+        }
+        
         case 1: 
         while (option!=0){
+        system("cls");
         printf("\n\n1.1.1.1 Agregar \n"); // CAMBIAR
         printf("1.1.1.2 Consultar por codigo \n");
         printf("1.1.1.3 Consultar por nombre \n");
         printf("1.1.1.4 Modificar por codigo \n");
         printf("1.1.1.5 Eliminar por codigo \n");
-        printf("1.1.1.6 Mostrar todos los productos \n");
+        printf("1.1.1.6 Mostrar todos los asociados \n");
         printf("1.1.1.0 Salir \n");
-        //======================================MENU ASOCIADOS======================================
-        fflush(stdin);scanf("%d", &option);fflush(stdin);
+        fflush(stdin);
+        if (scanf("%d", &option) != 1) {
+            option = -1; 
+        }
+        while (getchar() != '\n');
             switch(option){
+                case 0: {
+                    break;
+                }
                 case 1: {
+                    system("cls");
                     Sasociado* NewAsociado=NuevoAsociado(ListaAsociados);
                     AgregarAsociados(&ListaAsociados, &NewAsociado);
 					GuardarAsociados(ListaAsociados);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
                 case 2: {
+                    system("cls");
                     printf("Introduzca el codigo que desea consultar: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     ConsultarCodigoAsociado(ListaAsociados, codigo);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
                 case 3: {
                     char nombre[100];
+                    system("cls");  
                     printf("Introduzca el nombre del asociado que desea consultar: \n");
                     fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
                     while(strlen(nombre)>sizeof(ListaAsociados->nombre)){
@@ -636,9 +724,12 @@ int main(){
                         fflush(stdin);fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
                     }
                     BuscarPorNombreAsociado(ListaAsociados, nombre);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
                 case 4: {
+                    system("cls");  
                     printf("Que codigo deseas modificar: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
@@ -651,51 +742,76 @@ int main(){
                     break;
                 }
                 case 5: {
+                    system("cls");  
                     printf("Que codigo desea eliminar?: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     EliminarPorCodigoAsociado(&ListaAsociados, codigo);
 					GuardarAsociados(ListaAsociados);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
                 case 6: {
+                    system("cls");  
                     MostrarAsociados(ListaAsociados);
+                    printf("\n");
+                    system("pause");
                     break;
+                }
+                default: {
+                    system("cls");
+                    fflush(stdin);
+                    printf("Por favor introduzca una opcion valida. \n");
+                    printf("\n");
+                    system("pause");
                 }
             }
         }
         option=-1;
         break;
-        //PRODUCTOS
+        
+//======================================MENU PRODUCTOS======================================
         case 2: 
         while (option!=0){
-        printf("\n\n1.1.1.1 Agregar \n"); //LISTO
-        printf("1.1.1.2 Consultar por codigo \n"); //LISTO
+        system("cls");
+        printf("\n\n1.1.1.1 Agregar \n"); 
+        printf("1.1.1.2 Consultar por codigo \n"); 
         printf("1.1.1.3 Consultar por nombre \n"); 
-        printf("1.1.1.4 Modificar por codigo \n"); //LISTO
-        printf("1.1.1.5 Eliminar por codigo \n");  //LISTO
-        printf("1.1.1.6 Mostrar todos los productos \n"); //LISTO
+        printf("1.1.1.4 Modificar por codigo \n"); 
+        printf("1.1.1.5 Eliminar por codigo \n");  
+        printf("1.1.1.6 Mostrar todos los productos \n"); 
         printf("1.1.1.0 Salir \n");
-        fflush(stdin);scanf("%d", &option);fflush(stdin);
+        if (scanf("%d", &option) != 1) {
+            option = -1; 
+        }
+        while (getchar() != '\n');
             switch(option){
                 case 0:{
                     break;
                 }
                 case 1: {
+                    system("cls");
                     Sproducto* NewProducto=NuevoProducto(ListaProductos);
                     AgregarProductos(&ListaProductos, &NewProducto);
 					GuardarProductos(ListaProductos);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
 
                 case 2: {
+                    system("cls");
                     printf("Introduzca el codigo que desea consultar: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     ConsultarCodigo(ListaProductos, codigo);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
 
                 case 3: {
                     char nombre[100];
+                    system("cls");
                     printf("Introduzca el nombre del producto que desea consultar: \n");
                     fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
                     while(strlen(nombre)>sizeof(ListaProductos->nombre)){
@@ -703,13 +819,15 @@ int main(){
                         fflush(stdin);fflush(stdin);scanf(" %99[^\n]", nombre);fflush(stdin);
                     }
                     BuscarPorNombre(ListaProductos, nombre);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
 
                 case 4: {
+                    system("cls");
                     printf("Que codigo deseas modificar");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
-                    prueba=ExisteProducto(ListaProductos, codigo);
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
                         ModificarCodigo(prueba);
@@ -717,35 +835,52 @@ int main(){
                     else {
                         printf("No se encontro el producto con ese codigo.\n");
                     }
-                    ModificarCodigo(prueba);
                     break;
                     
                 }
                 
                 case 5: {
+                    system("cls");
                     printf("Que codigo desea eliminar?: ");
                     fflush(stdin);scanf("%d", &codigo);fflush(stdin);
                     EliminarPorCodigo(&ListaProductos, codigo);
 					GuardarProductos(ListaProductos);
+                    printf("\n");
+                    system("pause");
                     break;
                 }
-
                 case 6: {
+                    system("cls");
                     MostrarProductos(ListaProductos);
+                    printf("\n");
+                    system("pause");
+                    break;
+                }
+                default: {
+                    system("cls");
+                    printf("Por favor introduzca una opcion valida. ");
+                    printf("\n");
+                    system("pause");
                     break;
                 }
             }
         }
         option=-1;
         break;
-    
-    }
+//======================================MENU VENTAS======================================
+        case 3: {
+            system("cls");
+            printf("Opcion en desarrollo. \n");
+            system("pause");
+            break;
+        }
+        default: {
+            system("cls");
+            printf("Por favor introduzca una opcion valida. SKIBIDI. \n");
+            system("pause");
+            break; 
+        }
+        }
     }
     return 0;
 }
-//Output, agrego la libreria de archivo.
-//funciones de validacion.
-//std:ofstrean archivo(Nombre del archivo)
-//if nombre.is_open()
-//archivo<<
-//archivo.close
