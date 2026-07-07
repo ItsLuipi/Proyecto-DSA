@@ -585,7 +585,12 @@ void ModificarCodigo(Sproducto *lista){
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
-            scanf("%d", &mod);fflush(stdin);
+            while(scanf("%d", &mod) != 1){
+                printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                while (getchar() != '\n');
+                ("%d", &mod);
+            }
+
             while(!(BuscarCodigoProducto(lista, mod))){
                 printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                 fflush(stdin);scanf("%d", &mod);fflush(stdin);
@@ -689,7 +694,11 @@ int main(){
                 case 2: {
                     system("cls");
                     printf("Introduzca el codigo que desea consultar: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     ConsultarCodigoAsociado(ListaAsociados, codigo);
                     printf("\n");
                     system("pause");
@@ -712,7 +721,11 @@ int main(){
                 case 4: {
                     system("cls");  
                     printf("Que codigo deseas modificar: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
                     if(pruebasociado != NULL){
                         ModificarCodigoAsociado(pruebasociado);
@@ -726,7 +739,11 @@ int main(){
                 case 5: {
                     system("cls");  
                     printf("Que codigo desea eliminar?: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     EliminarPorCodigoAsociado(&ListaAsociados, codigo);
 					GuardarAsociados(ListaAsociados);
                     printf("\n");
@@ -784,7 +801,11 @@ int main(){
                 case 2: {
                     system("cls");
                     printf("Introduzca el codigo que desea consultar: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     ConsultarCodigo(ListaProductos, codigo);
                     printf("\n");
                     system("pause");
@@ -809,7 +830,11 @@ int main(){
                 case 4: {
                     system("cls");
                     printf("Que codigo deseas modificar: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
                         ModificarCodigo(prueba);
@@ -826,7 +851,11 @@ int main(){
                 case 5: {
                     system("cls");
                     printf("Que codigo desea eliminar?: ");
-                    fflush(stdin);scanf("%d", &codigo);fflush(stdin);
+                    while (scanf("%d", &codigo) != 1) {
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
+                        while (getchar() != '\n');
+                        ("%d", &codigo);
+                    }
                     EliminarPorCodigo(&ListaProductos, codigo);
 					GuardarProductos(ListaProductos);
                     printf("\n");
