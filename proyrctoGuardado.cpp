@@ -321,6 +321,9 @@ void ModificarCodigoAsociado(Sasociado *lista){
             strcpy(lista->nombre, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -332,6 +335,9 @@ void ModificarCodigoAsociado(Sasociado *lista){
             strcpy(lista->direccion, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 3:
             printf("Ingrese el numero de telefono del Asociado: ");
@@ -347,6 +353,9 @@ void ModificarCodigoAsociado(Sasociado *lista){
             }
 
             strcpy(lista->telefono, Cambio);
+            printf("Codigo cambiado con exito! \n");
+            system("pause");
+            GuardarAsociados(lista);
             break;
         case 4:
             printf("Ingrese el codigo del Asociado: ");
@@ -551,6 +560,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->nombre, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 2:
             printf("Ingrese la direccion: \n");
@@ -562,6 +574,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->marca, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 3:
             printf("Ingrese la descripcion: \n");
@@ -573,6 +588,9 @@ void ModificarCodigo(Sproducto *lista){
             strcpy(lista->descripcion, Cambio);
             fflush(stdin);
             printf("El codigo fue cambiado con exito!");
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         case 4:
             printf("Ingrese el precio: \n");
