@@ -609,6 +609,9 @@ void ModificarCodigo(Sproducto *lista){
                 fflush(stdin);scanf("%d", &mod);fflush(stdin);
             }
             lista->codigo=mod;
+            printf("\n");
+            system("pause");
+            GuardarProductos(lista);
             break;
         default:
             printf("Por favor introduzca una opcion valida. \n");
