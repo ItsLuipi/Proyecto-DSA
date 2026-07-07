@@ -298,12 +298,12 @@ Sasociado* ExisteAsociado(Sasociado *lista, int n){
     return ax;
 }
 
-void ModificarCodigoAsociado(Sasociado *lista){
+void ModificarCodigoAsociado(Sasociado *nodoAModificar, Sasociado *cabezaLista){
     int CambioNum;
     int menu;
     char Cambio[150];
 
-    if(lista==NULL){
+    if(nodoAModificar==NULL){
         printf("La lista esta vacia. ");
         return;
     }
@@ -318,33 +318,33 @@ void ModificarCodigoAsociado(Sasociado *lista){
         case 1:
             printf("Ingrese el nombre: \n");
             scanf(" %149[^\n]", Cambio);fflush(stdin);
-            while (strlen(Cambio)>=sizeof(lista->nombre)){
+            while (strlen(Cambio)>=sizeof(nodoAModificar->nombre)){
                 printf("El nombre excede los 30 caracteres, por favor introduzca algo mas corto. \n");
                 fflush(stdin);scanf(" %99[^\n]", Cambio);
                 }
-            strcpy(lista->nombre, Cambio);
+            strcpy(nodoAModificar->nombre, Cambio);
             fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("El nombre fue cambiado con exito!");
             printf("\n");
             system("pause");
             break;
         case 2:
             printf("Ingrese la direccion: \n");
             scanf(" %149[^\n]", Cambio);fflush(stdin);
-            while (strlen(Cambio)>=sizeof(lista->direccion)){
+            while (strlen(Cambio)>=sizeof(nodoAModificar->direccion)){
                 printf("La direccion se excede los 100 caracteres, por favor introduzca algo mas corto. \n");
                 fflush(stdin);scanf(" %99[^\n]", Cambio);
             }
-            strcpy(lista->direccion, Cambio);
+            strcpy(nodoAModificar->direccion, Cambio);
             fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("La direccion fue cambiada con exito!");
             printf("\n");
             system("pause");
             break;
         case 3:
             printf("Ingrese el numero de telefono del Asociado: ");
             fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
-            while(strlen(Cambio)>sizeof(lista->telefono)){
+            while(strlen(Cambio)>sizeof(nodoAModificar->telefono)){
                 printf("Se excede el numero de telefono.");
                 fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
             }
@@ -354,8 +354,8 @@ void ModificarCodigoAsociado(Sasociado *lista){
                 fflush(stdin);scanf(" %20[^\n]", Cambio);fflush(stdin);
             }
 
-            strcpy(lista->telefono, Cambio);
-            printf("Codigo cambiado con exito! \n");
+            strcpy(nodoAModificar->telefono, Cambio);
+            printf("Telefono cambiado con exito! \n");
             system("pause");
             break;
         case 4:
@@ -367,15 +367,21 @@ void ModificarCodigoAsociado(Sasociado *lista){
                     while (getchar() != '\n');
                     continue;
                 }
+                
+                // Novedad: Permitir que el usuario introduzca el mismo código que ya tiene
+                if (CambioNum == nodoAModificar->codigo) {
+                    break; 
+                }
         
-                if (!BuscarCodigoAsociado(lista, CambioNum)) {
+                // Novedad: Buscamos en toda la 'cabezaLista', no solo desde el nodo
+                if (!BuscarCodigoAsociado(cabezaLista, CambioNum)) {
                     printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                     continue; 
                 }
                 break; 
                 }
 
-            lista->codigo=CambioNum;
+            nodoAModificar->codigo=CambioNum;
             printf("\n");
             printf("Codigo cambiado con exito!");
             printf("\n");
@@ -543,12 +549,12 @@ Sproducto* ExisteProducto(Sproducto *lista, int n){
     return ax;
 }
 
-void ModificarCodigo(Sproducto *lista){
+void ModificarCodigo(Sproducto *nodoAModificar, Sproducto *cabezaLista){
     int mod;
     int menu;
     char Cambio[150];
 
-    if(lista==NULL){
+    if(nodoAModificar==NULL){
         printf("La lista esta vacia. ");
         return;
     }
@@ -558,49 +564,49 @@ void ModificarCodigo(Sproducto *lista){
     printf("2- Marca. \n");
     printf("3- Descripcion. \n");
     printf("4- Codigo. \n");
-    fflush(stdin);scanf("%d", &menu);fflush(stdin); //letras
+    fflush(stdin);scanf("%d", &menu);fflush(stdin);
     switch(menu){
         case 1:
             printf("Ingrese el nombre: \n");
             scanf(" %149[^\n]", Cambio);fflush(stdin);
-            while (strlen(Cambio)>=sizeof(lista->nombre)){
+            while (strlen(Cambio)>=sizeof(nodoAModificar->nombre)){
                 printf("El nombre excede los 30 caracteres, por favor introduzca algo mas corto. \n");
                 fflush(stdin);scanf(" %99[^\n]", Cambio);
                 }
-            strcpy(lista->nombre, Cambio);
+            strcpy(nodoAModificar->nombre, Cambio);
             fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("El nombre fue cambiado con exito!");
             printf("\n");
             system("pause");
             break;
         case 2:
-            printf("Ingrese la direccion: \n");
+            printf("Ingrese la marca: \n");
             scanf(" %149[^\n]", Cambio);fflush(stdin);
-            while (strlen(Cambio)>=sizeof(lista->marca)){
+            while (strlen(Cambio)>=sizeof(nodoAModificar->marca)){
                 printf("La marca se excede los 30 caracteres, por favor introduzca algo mas corto. \n");
                 fflush(stdin);scanf(" %99[^\n]", Cambio);
             }
-            strcpy(lista->marca, Cambio);
+            strcpy(nodoAModificar->marca, Cambio);
             fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("La marca fue cambiada con exito!");
             printf("\n");
             system("pause");
             break;
         case 3:
             printf("Ingrese la descripcion: \n");
             scanf(" %149[^\n]", Cambio);fflush(stdin);
-            while (strlen(Cambio)>=sizeof(lista->descripcion)){
+            while (strlen(Cambio)>=sizeof(nodoAModificar->descripcion)){
                 printf("La descripcion se excede los 100 caracteres, por favor introduzca algo mas corto. \n");
                 fflush(stdin);scanf(" %99[^\n]", Cambio);
                 }
-            strcpy(lista->descripcion, Cambio);
+            strcpy(nodoAModificar->descripcion, Cambio);
             fflush(stdin);
-            printf("El codigo fue cambiado con exito!");
+            printf("La descripcion fue cambiada con exito!");
             printf("\n");
             system("pause");
             break;
         case 4:
-            printf("Introduzca el nuevo codigo \n");
+            printf("Introduzca el nuevo codigo: \n");
             while (true) {
                 int exito = scanf("%d", &mod);
                 if (exito != 1) {
@@ -608,15 +614,21 @@ void ModificarCodigo(Sproducto *lista){
                     while (getchar() != '\n');
                     continue;
                 }
+                
+                // Novedad: Permitir que sea el mismo código
+                if (mod == nodoAModificar->codigo) {
+                    break;
+                }
         
-                if (!BuscarCodigoProducto(lista, mod)) {
+                // Novedad: Buscar duplicados usando cabezaLista
+                if (!BuscarCodigoProducto(cabezaLista, mod)) {
                     printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                     continue; 
                 }
                 break; 
                 }
-            lista->codigo=mod;
-            printf("\n");
+            nodoAModificar->codigo=mod;
+            printf("\nCodigo cambiado con exito!\n");
             system("pause");
             break;
         default:
@@ -744,15 +756,17 @@ int main(){
                     while (scanf("%d", &codigo) != 1) {
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
                         while (getchar() != '\n');
-                        ("%d", &codigo);
+                        // Corregido: te faltaba el scanf aquí abajo
+                        scanf("%d", &codigo);
                     }
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
                     if(pruebasociado != NULL){
-                        ModificarCodigoAsociado(pruebasociado);
+                        ModificarCodigoAsociado(pruebasociado, ListaAsociados);
                         GuardarAsociados(ListaAsociados);
                     } 
                     else {
-                        printf("No se encontro el producto con ese codigo.\n");
+                        printf("No se encontro el asociado con ese codigo.\n");
+                        system("pause");
                     }
                     break;
                 }
@@ -766,6 +780,7 @@ int main(){
                     }
                     EliminarPorCodigoAsociado(&ListaAsociados, codigo);
 					GuardarAsociados(ListaAsociados);
+                    printf("El codigo fue eliminado con exito!");
                     printf("\n");
                     system("pause");
                     break;
@@ -853,11 +868,11 @@ int main(){
                     while (scanf("%d", &codigo) != 1) {
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
                         while (getchar() != '\n');
-                        ("%d", &codigo);
+                        scanf("%d", &codigo);
                     }
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
-                        ModificarCodigo(prueba);
+                        ModificarCodigo(prueba, ListaProductos);
                         GuardarProductos(ListaProductos);
                     } 
                     else {
@@ -865,7 +880,6 @@ int main(){
                         system("pause");
                     }
                     break;
-                    
                 }
                 
                 case 5: {
