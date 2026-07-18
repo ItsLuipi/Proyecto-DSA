@@ -1106,6 +1106,269 @@ void MostrarVentasEntreFechasPorVendedor(Sasociado *ListaAsociados, Sproducto *L
     }
 }
 
+// ============================ REPORTES ============================
+
+struct R41 {
+    char marca[30];
+    int cantidad;
+    float monto_total;
+};
+
+struct R42 {
+    char producto[30];
+    int cantidad;
+    float monto_total;
+};
+
+struct R43 {
+    char producto[30];
+    char marca[30];
+    int cantidad;
+    float monto_total;
+};
+
+struct R44 {
+    char vendedor[50];
+    char producto[30];
+    char marca[30];
+    int cantidad;
+    float monto_total;
+    int fecha;
+};
+
+void ReporteProducto(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
+    int codigoProd;
+    printf("Ingrese el codigo del producto a consultar: ");
+    while (scanf("%d", &codigoProd) != 1) {
+        printf("Codigo invalido, intente de nuevo: ");
+        while (getchar() != '\n');
+    }
+    while (getchar() != '\n');
+
+    Sproducto *prod = ExisteProducto(ListaProductos, codigoProd);
+    if (!prod) { 
+        printf("Producto no encontrado.\n"); 
+        return; 
+    }
+
+    int count = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            if (v->codigo_producto == codigoProd) count++;
+        }
+    }
+    if (count == 0) { 
+        printf("No hay ventas registradas para este producto.\n"); 
+        return; 
+    }
+
+    R41 *arr = new R41[count];
+    int i = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            if (v->codigo_producto == codigoProd) {
+                strcpy(arr[i].marca, prod->marca);
+                arr[i].cantidad = v->cantidad;
+                arr[i].monto_total = v->monto_total;
+                i++;
+            }
+        }
+    }
+
+    // Ordenar por cantidad (descendente)
+    for (int x = 0; x < count - 1; x++) {
+        for (int y = x + 1; y < count; y++) {
+            if (arr[x].cantidad < arr[y].cantidad) {
+                R41 temp = arr[x];
+                arr[x] = arr[y];
+                arr[y] = temp;
+            }
+        }
+    }
+
+    printf("\n--- VENTAS DEL PRODUCTO: %s ---\n", prod->nombre);
+    for (int x = 0; x < count; x++) {
+        printf("Marca: %-15s | Cantidad: %-5d | Monto Total: %.2f\n", 
+            arr[x].marca, arr[x].cantidad, arr[x].monto_total);
+    }
+    delete[] arr;
+}
+
+void ReporteMarca(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
+    char marca[30];
+    printf("Ingrese la marca a consultar: ");
+    scanf(" %29[^\n]", marca);
+    while (getchar() != '\n');
+
+    int count = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            Sproducto *p = ExisteProducto(ListaProductos, v->codigo_producto);
+            if (p && ContainsIgnoreCase(p->marca, marca)) count++;
+        }
+    }
+    if (count == 0) { 
+        printf("No hay ventas registradas para esta marca.\n"); 
+        return; 
+    }
+
+    R42 *arr = new R42[count];
+    int i = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            Sproducto *p = ExisteProducto(ListaProductos, v->codigo_producto);
+            if (p && ContainsIgnoreCase(p->marca, marca)) {
+                strcpy(arr[i].producto, p->nombre);
+                arr[i].cantidad = v->cantidad;
+                arr[i].monto_total = v->monto_total;
+                i++;
+            }
+        }
+    }
+
+    // Ordenar por monto total (descendente)
+    for (int x = 0; x < count - 1; x++) {
+        for (int y = x + 1; y < count; y++) {
+            if (arr[x].monto_total < arr[y].monto_total) {
+                R42 temp = arr[x];
+                arr[x] = arr[y];
+                arr[y] = temp;
+            }
+        }
+    }
+
+    printf("\n--- VENTAS DE LA MARCA: %s ---\n", marca);
+    for (int x = 0; x < count; x++) {
+        printf("Producto: %-15s | Cantidad: %-5d | Monto Total: %.2f\n", 
+            arr[x].producto, arr[x].cantidad, arr[x].monto_total);
+    }
+    delete[] arr;
+}
+
+void ReporteVendedor(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
+    int codigoAsoc;
+    printf("Ingrese el codigo del vendedor: ");
+    while (scanf("%d", &codigoAsoc) != 1) {
+        printf("Codigo invalido, intente de nuevo: ");
+        while (getchar() != '\n');
+    }
+    while (getchar() != '\n');
+
+    Sasociado *a = ExisteAsociado(ListaAsociados, codigoAsoc);
+    if (!a) { 
+        printf("Vendedor no encontrado.\n"); 
+        return; 
+    }
+
+    int count = 0;
+    for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+        count++;
+    }
+    if (count == 0) { 
+        printf("No hay ventas registradas para este vendedor.\n"); 
+        return; 
+    }
+
+    R43 *arr = new R43[count];
+    int i = 0;
+    for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+        Sproducto *p = ExisteProducto(ListaProductos, v->codigo_producto);
+        if (p) {
+            strcpy(arr[i].producto, p->nombre);
+            strcpy(arr[i].marca, p->marca);
+        } else {
+            strcpy(arr[i].producto, "(Desconocido)");
+            strcpy(arr[i].marca, "(Desconocida)");
+        }
+        arr[i].cantidad = v->cantidad;
+        arr[i].monto_total = v->monto_total;
+        i++;
+    }
+
+    // Ordenar por producto / marca (ascendente - alfabetico)
+    for (int x = 0; x < count - 1; x++) {
+        for (int y = x + 1; y < count; y++) {
+            int cmp = strcmp(arr[x].producto, arr[y].producto);
+            if (cmp > 0 || (cmp == 0 && strcmp(arr[x].marca, arr[y].marca) > 0)) {
+                R43 temp = arr[x];
+                arr[x] = arr[y];
+                arr[y] = temp;
+            }
+        }
+    }
+
+    printf("\n--- VENTAS DEL VENDEDOR: %s ---\n", a->nombre);
+    for (int x = 0; x < count; x++) {
+        printf("Producto: %-15s | Marca: %-15s | Cantidad: %-5d | Monto Total: %.2f\n", 
+            arr[x].producto, arr[x].marca, arr[x].cantidad, arr[x].monto_total);
+    }
+    delete[] arr;
+}
+
+void ReporteFechas(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
+    int fechaInicio = PedirFecha("Ingrese la fecha INICIAL del rango:");
+    int fechaFin = PedirFecha("Ingrese la fecha FINAL del rango:");
+
+    if (fechaInicio > fechaFin) {
+        int temp = fechaInicio;
+        fechaInicio = fechaFin;
+        fechaFin = temp;
+    }
+
+    int count = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            if (v->fecha >= fechaInicio && v->fecha <= fechaFin) count++;
+        }
+    }
+    if (count == 0) { 
+        printf("No hay ventas registradas en ese rango de fechas.\n"); 
+        return; 
+    }
+
+    R44 *arr = new R44[count];
+    int i = 0;
+    for (Sasociado *a = ListaAsociados; a != NULL; a = a->pnext) {
+        for (Sventa *v = a->pventas; v != NULL; v = v->prventas) {
+            if (v->fecha >= fechaInicio && v->fecha <= fechaFin) {
+                strcpy(arr[i].vendedor, a->nombre);
+                Sproducto *p = ExisteProducto(ListaProductos, v->codigo_producto);
+                if (p) {
+                    strcpy(arr[i].producto, p->nombre);
+                    strcpy(arr[i].marca, p->marca);
+                } else {
+                    strcpy(arr[i].producto, "(Desconocido)");
+                    strcpy(arr[i].marca, "(Desconocida)");
+                }
+                arr[i].cantidad = v->cantidad;
+                arr[i].monto_total = v->monto_total;
+                arr[i].fecha = v->fecha;
+                i++;
+            }
+        }
+    }
+
+    // Ordenar por fecha (descendente: más nuevo a más antigua)
+    for (int x = 0; x < count - 1; x++) {
+        for (int y = x + 1; y < count; y++) {
+            if (arr[x].fecha < arr[y].fecha) {
+                R44 temp = arr[x];
+                arr[x] = arr[y];
+                arr[y] = temp;
+            }
+        }
+    }
+
+    printf("\n--- VENTAS ENTRE FECHAS ---\n");
+    for (int x = 0; x < count; x++) {
+        char fechaTxt[11];
+        FechaATexto(arr[x].fecha, fechaTxt);
+        printf("Fecha: %s | Vendedor: %-12s | Producto: %-12s | Marca: %-12s | Cantidad: %-4d | Monto: %.2f\n", 
+            fechaTxt, arr[x].vendedor, arr[x].producto, arr[x].marca, arr[x].cantidad, arr[x].monto_total);
+    }
+    delete[] arr;
+}
+
 int main(){
     int menu=1;
     int option=1;
@@ -1123,7 +1386,8 @@ int main(){
     printf("\n\n\t\tSistema de ventas DirVen\n\n");  
     printf("1. Asociados \n");  
     printf("2. Productos \n"); 
-    printf("3. Ventas \n");  
+    printf("3. Ventas \n");
+    printf("4. Reportes \n");
     printf("\n0. Salir\n");  
     if (scanf("%d", &menu) != 1) {
             menu = -1; 
@@ -1137,7 +1401,7 @@ int main(){
             system("pause");
             return 0;
         }
-        
+
         case 1: 
         while (option!=0){
         system("cls");
@@ -1413,6 +1677,58 @@ int main(){
                 }
             }
             option = -1;
+            break;
+        }
+
+//======================================MENU REPORTES======================================
+        case 4: {
+            int opcionReportes = 1;
+            while (opcionReportes != 0) {
+                system("cls");
+                printf("\n\n--- REPORTES ---\n");
+                printf("4.1 Dado un producto mostrar todas sus ventas \n");
+                printf("4.2 Dada una marca mostrar todas sus ventas \n");
+                printf("4.3 Dado un vendedor mostrar todas sus ventas \n");
+                printf("4.4 Mostrar todas las ventas entre dos fechas \n");
+                printf("4.0 Salir \n");
+                if (scanf("%d", &opcionReportes) != 1) {
+                    opcionReportes = -1;
+                }
+                while (getchar() != '\n');
+
+                switch (opcionReportes) {
+                    case 0: break;
+                    case 1:
+                        system("cls");
+                        ReporteProducto(ListaAsociados, ListaProductos);
+                        printf("\n");
+                        system("pause");
+                        break;
+                    case 2:
+                        system("cls");
+                        ReporteMarca(ListaAsociados, ListaProductos);
+                        printf("\n");
+                        system("pause");
+                        break;
+                    case 3:
+                        system("cls");
+                        ReporteVendedor(ListaAsociados, ListaProductos);
+                        printf("\n");
+                        system("pause");
+                        break;
+                    case 4:
+                        system("cls");
+                        ReporteFechas(ListaAsociados, ListaProductos);
+                        printf("\n");
+                        system("pause");
+                        break;
+                    default:
+                        system("cls");
+                        printf("Por favor introduzca una opcion valida.\n");
+                        system("pause");
+                        break;
+                }
+            }
             break;
         }
         default: {
