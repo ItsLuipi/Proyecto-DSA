@@ -987,6 +987,69 @@ void ConsultarVentaPorOperacion(Sasociado *ListaAsociados, Sproducto *ListaProdu
     }
 }
 
+// Elimina la venta de la lista del asociado al que pertenece (busca en
+// todos los asociados, ya que no sabemos de antemano cual es el dueno)
+bool EliminarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
+    Sasociado *a = ListaAsociados;
+    while(a){
+        Sventa *aux = a->pventas;
+        Sventa *anterior = NULL;
+        while(aux){
+            if(aux->num_operacion == numOperacion){
+                if(anterior == NULL){
+                    a->pventas = aux->prventas;
+                } else {
+                    anterior->prventas = aux->prventas;
+                }
+                delete aux;
+                return true;
+            }
+            anterior = aux;
+            aux = aux->prventas;
+        }
+        a = a->pnext;
+    }
+    return false;
+}
+
+// 3.3 Eliminar venta por codigo (numero) de operacion.
+// Primero la busca y la muestra (legible), pide confirmacion y luego la borra
+void EliminarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
+    int numOperacion;
+
+    printf("Ingrese el numero de operacion a eliminar: ");
+    while(scanf("%d", &numOperacion) != 1){
+        printf("Numero invalido, por favor intente de nuevo: ");
+        while(getchar() != '\n');
+    }
+    while(getchar() != '\n');
+
+    Sventa *v = BuscarVentaPorOperacion(ListaAsociados, numOperacion);
+    if(!v){
+        printf("No se encontro ninguna venta con el numero de operacion %d.\n", numOperacion);
+        return;
+    }
+
+    printf("\nVenta encontrada:\n");
+    MostrarVenta(v, ListaAsociados, ListaProductos);
+
+    int confirmar;
+    printf("\nEsta seguro que desea eliminar esta venta? (1 = Si, 0 = No): ");
+    while(scanf("%d", &confirmar) != 1){
+        printf("Opcion invalida, por favor intente de nuevo: ");
+        while(getchar() != '\n');
+    }
+    while(getchar() != '\n');
+
+    if(confirmar == 1){
+        EliminarVentaPorOperacion(ListaAsociados, numOperacion);
+        GuardarVentas(ListaAsociados);
+        printf("\nLa venta fue eliminada con exito!\n");
+    } else {
+        printf("\nOperacion cancelada, la venta no fue eliminada.\n");
+    }
+}
+
 int main(){
     int menu=1;
     int option=1;
@@ -1273,7 +1336,8 @@ int main(){
                     }
                     case 3: {
                         system("cls");
-                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        EliminarVenta(ListaAsociados, ListaProductos);
+                        printf("\n");
                         system("pause");
                         break;
                     }
