@@ -644,6 +644,7 @@ void EliminarPorCodigo(Sproducto **a, int n){
     if((*a)->codigo==n){
         aux=*a;
         *a=(*a)->psig;
+        printf("El codigo fue eliminado con exito!\n"); //Corregido, ya muestra los mensajes
         delete aux;
     }
     else{
@@ -755,9 +756,8 @@ int main(){
                     printf("Que codigo deseas modificar: ");
                     while (scanf("%d", &codigo) != 1) {
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
-                        while (getchar() != '\n');
-                        // Corregido: te faltaba el scanf aquí abajo
                         scanf("%d", &codigo);
+                        while (getchar() != '\n') {}; //Corregido el problema del buffer al insertar el codigo
                     }
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
                     if(pruebasociado != NULL){
@@ -867,8 +867,8 @@ int main(){
                     printf("Que codigo deseas modificar: ");
                     while (scanf("%d", &codigo) != 1) {
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
-                        while (getchar() != '\n');
-                        scanf("%d", &codigo);
+                        scanf(" %d", &codigo);
+                        while (getchar() != '\n') {}; //Corregido el problema del buffer al insertar el codigo
                     }
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
