@@ -7,9 +7,12 @@ using namespace std;
 //SIGMA SIGMA BOY 
 struct Sventa {
     int num_operacion;
-    char producto[50];       
+    int codigo_producto;     // enlaza con Sproducto->codigo
+    int codigo_asociado;     // enlaza con Sasociado->codigo (vendedor)
     int cantidad;
-    char fecha[15];         
+    float precio_unidad;
+    float monto_total;
+    int fecha;                // formato AAAAMMDD (ej: 20260718) -> se puede comparar como numero
     
     struct Sventa* prventas; 
 };
@@ -173,8 +176,6 @@ void CargarAsociados(Sasociado **lista) {
     fclose(f);
 }
 
-void CargarVentas(){}
-void GuardarVentas(){}
 //============================ASOCIADOS============================
 void AgregarAsociados(Sasociado **lista, Sasociado** asociado){
         (*asociado)->pnext=*lista;
@@ -667,6 +668,294 @@ void EliminarPorCodigo(Sproducto **a, int n){
 }
 
 
+//============================VENTAS============================
+
+// Determina si un anio es bisiesto (para validar el 29 de febrero)
+bool EsBisiesto(int anio){
+    return (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+}
+
+// Cuantos dias tiene un mes en un anio dado
+int DiasEnMes(int mes, int anio){
+    int dias[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    if(mes == 2 && EsBisiesto(anio)) return 29;
+    return dias[mes-1];
+}
+
+// Le pide al usuario dia/mes/anio, valida que la fecha exista de verdad,
+// y la devuelve como un entero AAAAMMDD (ej: 18/07/2026 -> 20260718)
+// Ese formato permite comparar fechas directamente con <, > o == (sin comparar texto)
+int PedirFecha(const char mensaje[]){
+    int dia, mes, anio;
+    printf("%s\n", mensaje);
+    while(true){
+        printf("  Dia (1-31): ");
+        while(scanf("%d", &dia) != 1){
+            printf("  Valor invalido, intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        printf("  Mes (1-12): ");
+        while(scanf("%d", &mes) != 1){
+            printf("  Valor invalido, intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        printf("  Anio (ej: 2026): ");
+        while(scanf("%d", &anio) != 1){
+            printf("  Valor invalido, intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        while(getchar() != '\n');
+
+        if(mes < 1 || mes > 12){
+            printf("  Mes invalido, debe estar entre 1 y 12. Intente de nuevo.\n");
+            continue;
+        }
+        if(anio < 1900 || anio > 2100){
+            printf("  Anio invalido. Intente de nuevo.\n");
+            continue;
+        }
+        if(dia < 1 || dia > DiasEnMes(mes, anio)){
+            printf("  Ese dia no existe para ese mes/anio. Intente de nuevo.\n");
+            continue;
+        }
+        break;
+    }
+    return anio * 10000 + mes * 100 + dia;
+}
+
+// Convierte una fecha AAAAMMDD a texto legible dd/mm/aaaa (solo para mostrarla)
+void FechaATexto(int fecha, char texto[11]){
+    int anio = fecha / 10000;
+    int mes  = (fecha / 100) % 100;
+    int dia  = fecha % 100;
+    sprintf(texto, "%02d/%02d/%04d", dia, mes, anio);
+}
+
+// Recorre TODAS las ventas de TODOS los asociados para sacar el proximo
+// numero de operacion disponible (siempre unico en todo el sistema)
+int SiguienteNumOperacion(Sasociado *ListaAsociados){
+    int max = 0;
+    Sasociado *a = ListaAsociados;
+    while(a){
+        Sventa *v = a->pventas;
+        while(v){
+            if(v->num_operacion > max) max = v->num_operacion;
+            v = v->prventas;
+        }
+        a = a->pnext;
+    }
+    return max + 1;
+}
+
+// Inserta la venta dentro de la lista del asociado, ordenada ascendente
+// por num_operacion (nos sirve para 3.4, que pide orden por num de operacion)
+void InsertarVentaOrdenada(Sasociado *asociado, Sventa *nueva){
+    if(!asociado->pventas || asociado->pventas->num_operacion > nueva->num_operacion){
+        nueva->prventas = asociado->pventas;
+        asociado->pventas = nueva;
+        return;
+    }
+    Sventa *aux = asociado->pventas;
+    while(aux->prventas && aux->prventas->num_operacion < nueva->num_operacion){
+        aux = aux->prventas;
+    }
+    nueva->prventas = aux->prventas;
+    aux->prventas = nueva;
+}
+
+void GuardarVentas(Sasociado *ListaAsociados){
+    FILE *f = fopen("ventas.txt", "w");
+    if(!f){
+        printf("Error al abrir ventas.txt\n");
+        return;
+    }
+    Sasociado *a = ListaAsociados;
+    while(a){
+        Sventa *v = a->pventas;
+        while(v){
+            fprintf(f, "%d|%d|%d|%d|%.2f|%.2f|%d\n",
+                v->num_operacion,
+                v->codigo_asociado,
+                v->codigo_producto,
+                v->cantidad,
+                v->precio_unidad,
+                v->monto_total,
+                v->fecha);
+            v = v->prventas;
+        }
+        a = a->pnext;
+    }
+    fclose(f);
+}
+
+// Se debe llamar DESPUES de CargarAsociados, porque cada venta se cuelga
+// del asociado (vendedor) al que pertenece segun su codigo
+void CargarVentas(Sasociado *ListaAsociados){
+    FILE *f = fopen("ventas.txt", "r");
+    if(!f) return;
+    while(1){
+        Sventa *nueva = new Sventa;
+        int codigoAsoc;
+        if(fscanf(f, "%d|%d|%d|%d|%f|%f|%d\n",
+            &nueva->num_operacion,
+            &codigoAsoc,
+            &nueva->codigo_producto,
+            &nueva->cantidad,
+            &nueva->precio_unidad,
+            &nueva->monto_total,
+            &nueva->fecha) == 7){
+
+            nueva->codigo_asociado = codigoAsoc;
+            nueva->prventas = NULL;
+
+            Sasociado *a = ExisteAsociado(ListaAsociados, codigoAsoc);
+            if(a){
+                InsertarVentaOrdenada(a, nueva);
+            } else {
+                // El asociado ya no existe (fue eliminado), se descarta la venta
+                delete nueva;
+            }
+        } else {
+            delete nueva;
+            break;
+        }
+    }
+    fclose(f);
+}
+
+// Muestra una venta con datos LEGIBLES: nombre del vendedor, nombre del
+// producto y nombre de la marca (no codigos crudos)
+void MostrarVenta(Sventa *v, Sasociado *ListaAsociados, Sproducto *ListaProductos){
+    if(!v) return;
+    Sasociado *a = ExisteAsociado(ListaAsociados, v->codigo_asociado);
+    Sproducto *p = ExisteProducto(ListaProductos, v->codigo_producto);
+    char fechaTxt[11];
+    FechaATexto(v->fecha, fechaTxt);
+    printf("N.Operacion: %d | Vendedor: %s | Producto: %s | Marca: %s | Cantidad: %d | Precio Unidad: %.2f | Monto Total: %.2f | Fecha: %s\n",
+        v->num_operacion,
+        a ? a->nombre : "(asociado no encontrado)",
+        p ? p->nombre : "(producto no encontrado)",
+        p ? p->marca  : "(marca no encontrada)",
+        v->cantidad,
+        v->precio_unidad,
+        v->monto_total,
+        fechaTxt);
+}
+
+// Pide codigo de producto (validado contra ListaProductos), cantidad y
+// precio unidad, y arma la venta enlazada por codigos
+Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos, Sasociado *ListaAsociados){
+    int codigoProd;
+    int cantidad;
+    float precio;
+    Sproducto *prodEncontrado = NULL;
+
+    printf("Ingrese el codigo del producto: ");
+    while(true){
+        if(scanf("%d", &codigoProd) != 1){
+            printf("Codigo invalido, por favor intente de nuevo: ");
+            while(getchar() != '\n');
+            continue;
+        }
+        prodEncontrado = ExisteProducto(ListaProductos, codigoProd);
+        if(!prodEncontrado){
+            printf("No existe un producto con ese codigo, intente de nuevo: ");
+            continue;
+        }
+        break;
+    }
+    while(getchar() != '\n');
+
+    printf("Producto seleccionado -> ");
+    MostrarProducto(prodEncontrado);
+
+    printf("Ingrese la cantidad vendida: ");
+    while(true){
+        if(scanf("%d", &cantidad) != 1 || cantidad <= 0){
+            printf("Cantidad invalida (debe ser mayor a 0), intente de nuevo: ");
+            while(getchar() != '\n');
+            continue;
+        }
+        break;
+    }
+    while(getchar() != '\n');
+
+    printf("Ingrese el precio por unidad: ");
+    while(true){
+        if(scanf("%f", &precio) != 1 || precio <= 0){
+            printf("Precio invalido (debe ser mayor a 0), intente de nuevo: ");
+            while(getchar() != '\n');
+            continue;
+        }
+        break;
+    }
+    while(getchar() != '\n');
+
+    Sventa *nueva = new Sventa;
+    nueva->num_operacion = SiguienteNumOperacion(ListaAsociados);
+    nueva->codigo_producto = prodEncontrado->codigo;
+    nueva->codigo_asociado = asociado->codigo;
+    nueva->cantidad = cantidad;
+    nueva->precio_unidad = precio;
+    nueva->monto_total = cantidad * precio;
+    nueva->fecha = PedirFecha("Ingrese la fecha de la venta:");
+    nueva->prventas = NULL;
+
+    return nueva;
+}
+
+// 3.1 Agregar venta: selecciona un vendedor UNA vez y luego permite
+// seguir cargando ventas para ese mismo vendedor hasta que decida volver
+void AgregarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
+    if(!ListaAsociados){
+        printf("No hay asociados registrados. Registre un asociado primero.\n");
+        return;
+    }
+    if(!ListaProductos){
+        printf("No hay productos registrados. Registre un producto primero.\n");
+        return;
+    }
+
+    int codigoAsoc;
+    Sasociado *asociado = NULL;
+
+    printf("Ingrese el codigo del vendedor (asociado): ");
+    while(true){
+        if(scanf("%d", &codigoAsoc) != 1){
+            printf("Codigo invalido, por favor intente de nuevo: ");
+            while(getchar() != '\n');
+            continue;
+        }
+        asociado = ExisteAsociado(ListaAsociados, codigoAsoc);
+        if(!asociado){
+            printf("No existe un asociado con ese codigo, intente de nuevo: ");
+            continue;
+        }
+        break;
+    }
+    while(getchar() != '\n');
+
+    printf("Vendedor seleccionado: %s\n\n", asociado->nombre);
+
+    int seguir = 1;
+    while(seguir){
+        Sventa *nueva = NuevaVenta(asociado, ListaProductos, ListaAsociados);
+        InsertarVentaOrdenada(asociado, nueva);
+        GuardarVentas(ListaAsociados);
+
+        printf("\nVenta registrada con exito:\n");
+        MostrarVenta(nueva, ListaAsociados, ListaProductos);
+
+        printf("\nDesea agregar otra venta para %s? (1 = Si, 0 = Volver al menu): ", asociado->nombre);
+        while(scanf("%d", &seguir) != 1){
+            printf("Opcion invalida, intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        while(getchar() != '\n');
+        printf("\n");
+    }
+}
+
 int main(){
     int menu=1;
     int option=1;
@@ -678,6 +967,7 @@ int main(){
     Sasociado* pruebasociado;
 	CargarProductos(&ListaProductos);
 	CargarAsociados(&ListaAsociados);
+	CargarVentas(ListaAsociados);
     while (menu!=0){
     system("cls");
     printf("\n\n\t\tSistema de ventas DirVen\n\n");  
@@ -917,10 +1207,59 @@ int main(){
         option=-1;
         break;
 //======================================MENU VENTAS======================================
+//======================================MENU VENTAS======================================
         case 3: {
-            system("cls");
-            printf("Opcion en desarrollo. \n");
-            system("pause");
+            int opcionVentas = 1;
+            while (opcionVentas != 0) {
+                system("cls");
+                printf("\n\n3.1 Agregar venta \n");
+                printf("3.2 Consultar por numero de operacion \n");
+                printf("3.3 Eliminar venta (por codigo de operacion) \n");
+                printf("3.4 Mostrar todas las ventas entre dos fechas \n");
+                printf("3.0 Salir \n");
+                if (scanf("%d", &opcionVentas) != 1) {
+                    opcionVentas = -1;
+                }
+                while (getchar() != '\n');
+
+                switch (opcionVentas) {
+                    case 0: {
+                        break;
+                    }
+                    case 1: {
+                        system("cls");
+                        AgregarVenta(ListaAsociados, ListaProductos);
+                        printf("\n");
+                        system("pause");
+                        break;
+                    }
+                    case 2: {
+                        system("cls");
+                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        system("pause");
+                        break;
+                    }
+                    case 3: {
+                        system("cls");
+                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        system("pause");
+                        break;
+                    }
+                    case 4: {
+                        system("cls");
+                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        system("pause");
+                        break;
+                    }
+                    default: {
+                        system("cls");
+                        printf("Por favor introduzca una opcion valida. \n");
+                        system("pause");
+                        break;
+                    }
+                }
+            }
+            option = -1;
             break;
         }
         default: {
