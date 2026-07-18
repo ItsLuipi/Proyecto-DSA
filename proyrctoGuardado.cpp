@@ -4,15 +4,14 @@ using namespace std;
 //LUIS LARA Y GABRIEL FREAY
 
 
-//SIGMA SIGMA BOY 
 struct Sventa {
     int num_operacion;
-    int codigo_producto;     // enlaza con Sproducto->codigo
-    int codigo_asociado;     // enlaza con Sasociado->codigo (vendedor)
+    int codigo_producto;     
+    int codigo_asociado;   
     int cantidad;
     float precio_unidad;
     float monto_total;
-    int fecha;                // formato AAAAMMDD (ej: 20260718) -> se puede comparar como numero
+    int fecha;               
     
     struct Sventa* prventas; 
 };
@@ -371,12 +370,12 @@ void ModificarCodigoAsociado(Sasociado *nodoAModificar, Sasociado *cabezaLista){
                     continue;
                 }
                 
-                // Novedad: Permitir que el usuario introduzca el mismo código que ya tiene
+                
                 if (CambioNum == nodoAModificar->codigo) {
                     break; 
                 }
         
-                // Novedad: Buscamos en toda la 'cabezaLista', no solo desde el nodo
+                
                 if (!BuscarCodigoAsociado(cabezaLista, CambioNum)) {
                     printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                     continue; 
@@ -618,12 +617,12 @@ void ModificarCodigo(Sproducto *nodoAModificar, Sproducto *cabezaLista){
                     continue;
                 }
                 
-                // Novedad: Permitir que sea el mismo código
+                
                 if (mod == nodoAModificar->codigo) {
                     break;
                 }
         
-                // Novedad: Buscar duplicados usando cabezaLista
+                
                 if (!BuscarCodigoProducto(cabezaLista, mod)) {
                     printf("El codigo ya se encuentra en la lista, por favor introduzca uno distinto: ");
                     continue; 
@@ -647,7 +646,7 @@ void EliminarPorCodigo(Sproducto **a, int n){
     if((*a)->codigo==n){
         aux=*a;
         *a=(*a)->psig;
-        printf("El codigo fue eliminado con exito!\n"); //Corregido, ya muestra los mensajes
+        printf("El codigo fue eliminado con exito!\n"); 
         delete aux;
     }
     else{
@@ -670,21 +669,18 @@ void EliminarPorCodigo(Sproducto **a, int n){
 
 //============================VENTAS============================
 
-// Determina si un anio es bisiesto (para validar el 29 de febrero)
+
 bool EsBisiesto(int anio){
     return (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
 }
 
-// Cuantos dias tiene un mes en un anio dado
 int DiasEnMes(int mes, int anio){
     int dias[] = {31,28,31,30,31,30,31,31,30,31,30,31};
     if(mes == 2 && EsBisiesto(anio)) return 29;
     return dias[mes-1];
 }
 
-// Le pide al usuario dia/mes/anio, valida que la fecha exista de verdad,
-// y la devuelve como un entero AAAAMMDD (ej: 18/07/2026 -> 20260718)
-// Ese formato permite comparar fechas directamente con <, > o == (sin comparar texto)
+
 int PedirFecha(const char mensaje[]){
     int dia, mes, anio;
     printf("%s\n", mensaje);
@@ -723,7 +719,6 @@ int PedirFecha(const char mensaje[]){
     return anio * 10000 + mes * 100 + dia;
 }
 
-// Convierte una fecha AAAAMMDD a texto legible dd/mm/aaaa (solo para mostrarla)
 void FechaATexto(int fecha, char texto[11]){
     int anio = fecha / 10000;
     int mes  = (fecha / 100) % 100;
@@ -731,12 +726,10 @@ void FechaATexto(int fecha, char texto[11]){
     sprintf(texto, "%02d/%02d/%04d", dia, mes, anio);
 }
 
-// Variable global: cada vez que se registra una venta se usa este valor
-// y luego se incrementa. Mucho mas simple que recorrer todas las listas.
+
 int siguienteNumOperacion = 1;
 
-// Inserta la venta dentro de la lista del asociado, ordenada ascendente
-// por num_operacion (nos sirve para 3.4, que pide orden por num de operacion)
+
 void InsertarVentaOrdenada(Sasociado *asociado, Sventa *nueva){
     if(!asociado->pventas || asociado->pventas->num_operacion > nueva->num_operacion){
         nueva->prventas = asociado->pventas;
@@ -776,8 +769,7 @@ void GuardarVentas(Sasociado *ListaAsociados){
     fclose(f);
 }
 
-// Se debe llamar DESPUES de CargarAsociados, porque cada venta se cuelga
-// del asociado (vendedor) al que pertenece segun su codigo
+
 void CargarVentas(Sasociado *ListaAsociados){
     FILE *f = fopen("ventas.txt", "r");
     if(!f) return;
@@ -796,8 +788,7 @@ void CargarVentas(Sasociado *ListaAsociados){
             nueva->codigo_asociado = codigoAsoc;
             nueva->prventas = NULL;
 
-            // Mantenemos la variable global al dia: si esta venta tiene un
-            // numero de operacion mayor o igual al que sigue, empujamos el contador
+
             if(nueva->num_operacion >= siguienteNumOperacion){
                 siguienteNumOperacion = nueva->num_operacion + 1;
             }
@@ -806,7 +797,6 @@ void CargarVentas(Sasociado *ListaAsociados){
             if(a){
                 InsertarVentaOrdenada(a, nueva);
             } else {
-                // El asociado ya no existe (fue eliminado), se descarta la venta
                 delete nueva;
             }
         } else {
@@ -817,8 +807,7 @@ void CargarVentas(Sasociado *ListaAsociados){
     fclose(f);
 }
 
-// Muestra una venta con datos LEGIBLES: nombre del vendedor, nombre del
-// producto y nombre de la marca (no codigos crudos)
+
 void MostrarVenta(Sventa *v, Sasociado *ListaAsociados, Sproducto *ListaProductos){
     if(!v) return;
     Sasociado *a = ExisteAsociado(ListaAsociados, v->codigo_asociado);
@@ -836,8 +825,7 @@ void MostrarVenta(Sventa *v, Sasociado *ListaAsociados, Sproducto *ListaProducto
         fechaTxt);
 }
 
-// Pide codigo de producto (validado contra ListaProductos), cantidad y
-// precio unidad, y arma la venta enlazada por codigos
+
 Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos){
     int codigoProd;
     int cantidad;
@@ -899,8 +887,7 @@ Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos){
     return nueva;
 }
 
-// 3.1 Agregar venta: selecciona un vendedor UNA vez y luego permite
-// seguir cargando ventas para ese mismo vendedor hasta que decida volver
+
 void AgregarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     if(!ListaAsociados){
         printf("No hay asociados registrados. Registre un asociado primero.\n");
@@ -966,8 +953,7 @@ Sventa* BuscarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
     return NULL;
 }
 
-// 3.2 Consultar por numero de operacion: muestra nombre del vendedor,
-// datos del producto, cantidad, precio unidad, monto total y fecha
+
 void ConsultarVentaPorOperacion(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     int numOperacion;
 
@@ -987,8 +973,7 @@ void ConsultarVentaPorOperacion(Sasociado *ListaAsociados, Sproducto *ListaProdu
     }
 }
 
-// Elimina la venta de la lista del asociado al que pertenece (busca en
-// todos los asociados, ya que no sabemos de antemano cual es el dueno)
+
 bool EliminarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
     Sasociado *a = ListaAsociados;
     while(a){
@@ -1012,8 +997,7 @@ bool EliminarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
     return false;
 }
 
-// 3.3 Eliminar venta por codigo (numero) de operacion.
-// Primero la busca y la muestra (legible), pide confirmacion y luego la borra
+
 void EliminarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     int numOperacion;
 
@@ -1050,9 +1034,7 @@ void EliminarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     }
 }
 
-// 3.4 Mostrar todas las ventas de un vendedor entre dos fechas.
-// La lista de ventas del asociado ya esta ordenada por num_operacion
-// (la mantiene asi InsertarVentaOrdenada), asi que solo hay que filtrar por fecha.
+
 void MostrarVentasEntreFechasPorVendedor(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     if(!ListaAsociados){
         printf("No hay asociados registrados.\n");
@@ -1083,7 +1065,7 @@ void MostrarVentasEntreFechasPorVendedor(Sasociado *ListaAsociados, Sproducto *L
     int fechaInicio = PedirFecha("Ingrese la fecha INICIAL del rango:");
     int fechaFin = PedirFecha("Ingrese la fecha FINAL del rango:");
 
-    // Por si el usuario las mete al reves, las intercambiamos
+    
     if(fechaInicio > fechaFin){
         int temp = fechaInicio;
         fechaInicio = fechaFin;
@@ -1175,7 +1157,7 @@ void ReporteProducto(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
         }
     }
 
-    // Ordenar por cantidad (descendente)
+    
     for (int x = 0; x < count - 1; x++) {
         for (int y = x + 1; y < count; y++) {
             if (arr[x].cantidad < arr[y].cantidad) {
@@ -1226,7 +1208,7 @@ void ReporteMarca(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
         }
     }
 
-    // Ordenar por monto total (descendente)
+    
     for (int x = 0; x < count - 1; x++) {
         for (int y = x + 1; y < count; y++) {
             if (arr[x].monto_total < arr[y].monto_total) {
@@ -1285,7 +1267,7 @@ void ReporteVendedor(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
         i++;
     }
 
-    // Ordenar por producto / marca (ascendente - alfabetico)
+    
     for (int x = 0; x < count - 1; x++) {
         for (int y = x + 1; y < count; y++) {
             int cmp = strcmp(arr[x].producto, arr[y].producto);
@@ -1393,6 +1375,7 @@ int main(){
             menu = -1; 
     }
     while (getchar() != '\n');
+
 //======================================MENU ASOCIADOS======================================
     switch (menu){
         case 0: {
@@ -1620,7 +1603,7 @@ int main(){
         }
         option=-1;
         break;
-//======================================MENU VENTAS======================================
+
 //======================================MENU VENTAS======================================
         case 3: {
             int opcionVentas = 1;
