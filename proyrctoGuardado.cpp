@@ -173,6 +173,8 @@ void CargarAsociados(Sasociado **lista) {
     fclose(f);
 }
 
+void CargarVentas(){}
+void GuardarVentas(){}
 //============================ASOCIADOS============================
 void AgregarAsociados(Sasociado **lista, Sasociado** asociado){
         (*asociado)->pnext=*lista;
