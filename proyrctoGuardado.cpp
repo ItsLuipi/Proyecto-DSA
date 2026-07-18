@@ -731,21 +731,9 @@ void FechaATexto(int fecha, char texto[11]){
     sprintf(texto, "%02d/%02d/%04d", dia, mes, anio);
 }
 
-// Recorre TODAS las ventas de TODOS los asociados para sacar el proximo
-// numero de operacion disponible (siempre unico en todo el sistema)
-int SiguienteNumOperacion(Sasociado *ListaAsociados){
-    int max = 0;
-    Sasociado *a = ListaAsociados;
-    while(a){
-        Sventa *v = a->pventas;
-        while(v){
-            if(v->num_operacion > max) max = v->num_operacion;
-            v = v->prventas;
-        }
-        a = a->pnext;
-    }
-    return max + 1;
-}
+// Variable global: cada vez que se registra una venta se usa este valor
+// y luego se incrementa. Mucho mas simple que recorrer todas las listas.
+int siguienteNumOperacion = 1;
 
 // Inserta la venta dentro de la lista del asociado, ordenada ascendente
 // por num_operacion (nos sirve para 3.4, que pide orden por num de operacion)
@@ -808,6 +796,12 @@ void CargarVentas(Sasociado *ListaAsociados){
             nueva->codigo_asociado = codigoAsoc;
             nueva->prventas = NULL;
 
+            // Mantenemos la variable global al dia: si esta venta tiene un
+            // numero de operacion mayor o igual al que sigue, empujamos el contador
+            if(nueva->num_operacion >= siguienteNumOperacion){
+                siguienteNumOperacion = nueva->num_operacion + 1;
+            }
+
             Sasociado *a = ExisteAsociado(ListaAsociados, codigoAsoc);
             if(a){
                 InsertarVentaOrdenada(a, nueva);
@@ -844,7 +838,7 @@ void MostrarVenta(Sventa *v, Sasociado *ListaAsociados, Sproducto *ListaProducto
 
 // Pide codigo de producto (validado contra ListaProductos), cantidad y
 // precio unidad, y arma la venta enlazada por codigos
-Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos, Sasociado *ListaAsociados){
+Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos){
     int codigoProd;
     int cantidad;
     float precio;
@@ -892,7 +886,8 @@ Sventa* NuevaVenta(Sasociado *asociado, Sproducto *ListaProductos, Sasociado *Li
     while(getchar() != '\n');
 
     Sventa *nueva = new Sventa;
-    nueva->num_operacion = SiguienteNumOperacion(ListaAsociados);
+    nueva->num_operacion = siguienteNumOperacion;
+    siguienteNumOperacion++;
     nueva->codigo_producto = prodEncontrado->codigo;
     nueva->codigo_asociado = asociado->codigo;
     nueva->cantidad = cantidad;
@@ -939,7 +934,7 @@ void AgregarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
 
     int seguir = 1;
     while(seguir){
-        Sventa *nueva = NuevaVenta(asociado, ListaProductos, ListaAsociados);
+        Sventa *nueva = NuevaVenta(asociado, ListaProductos);
         InsertarVentaOrdenada(asociado, nueva);
         GuardarVentas(ListaAsociados);
 
@@ -953,6 +948,42 @@ void AgregarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
         }
         while(getchar() != '\n');
         printf("\n");
+    }
+}
+
+// Busca una venta por su numero de operacion, recorriendo todos los
+// asociados y, dentro de cada uno, todas sus ventas
+Sventa* BuscarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
+    Sasociado *a = ListaAsociados;
+    while(a){
+        Sventa *v = a->pventas;
+        while(v){
+            if(v->num_operacion == numOperacion) return v;
+            v = v->prventas;
+        }
+        a = a->pnext;
+    }
+    return NULL;
+}
+
+// 3.2 Consultar por numero de operacion: muestra nombre del vendedor,
+// datos del producto, cantidad, precio unidad, monto total y fecha
+void ConsultarVentaPorOperacion(Sasociado *ListaAsociados, Sproducto *ListaProductos){
+    int numOperacion;
+
+    printf("Ingrese el numero de operacion a consultar: ");
+    while(scanf("%d", &numOperacion) != 1){
+        printf("Numero invalido, por favor intente de nuevo: ");
+        while(getchar() != '\n');
+    }
+    while(getchar() != '\n');
+
+    Sventa *v = BuscarVentaPorOperacion(ListaAsociados, numOperacion);
+    if(v){
+        printf("\n");
+        MostrarVenta(v, ListaAsociados, ListaProductos);
+    } else {
+        printf("No se encontro ninguna venta con el numero de operacion %d.\n", numOperacion);
     }
 }
 
@@ -1235,7 +1266,8 @@ int main(){
                     }
                     case 2: {
                         system("cls");
-                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        ConsultarVentaPorOperacion(ListaAsociados, ListaProductos);
+                        printf("\n");
                         system("pause");
                         break;
                     }
