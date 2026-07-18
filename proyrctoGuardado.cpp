@@ -1330,7 +1330,7 @@ void ReporteFechas(Sasociado *ListaAsociados, Sproducto *ListaProductos) {
         }
     }
 
-    // Ordenar por fecha (descendente: más nuevo a más antigua)
+
     for (int x = 0; x < count - 1; x++) {
         for (int y = x + 1; y < count; y++) {
             if (arr[x].fecha < arr[y].fecha) {
