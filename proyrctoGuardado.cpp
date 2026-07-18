@@ -1050,6 +1050,62 @@ void EliminarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     }
 }
 
+// 3.4 Mostrar todas las ventas de un vendedor entre dos fechas.
+// La lista de ventas del asociado ya esta ordenada por num_operacion
+// (la mantiene asi InsertarVentaOrdenada), asi que solo hay que filtrar por fecha.
+void MostrarVentasEntreFechasPorVendedor(Sasociado *ListaAsociados, Sproducto *ListaProductos){
+    if(!ListaAsociados){
+        printf("No hay asociados registrados.\n");
+        return;
+    }
+
+    int codigoAsoc;
+    Sasociado *asociado = NULL;
+
+    printf("Ingrese el codigo del vendedor: ");
+    while(true){
+        if(scanf("%d", &codigoAsoc) != 1){
+            printf("Codigo invalido, por favor intente de nuevo: ");
+            while(getchar() != '\n');
+            continue;
+        }
+        asociado = ExisteAsociado(ListaAsociados, codigoAsoc);
+        if(!asociado){
+            printf("No existe un asociado con ese codigo, intente de nuevo: ");
+            continue;
+        }
+        break;
+    }
+    while(getchar() != '\n');
+
+    printf("Vendedor: %s\n\n", asociado->nombre);
+
+    int fechaInicio = PedirFecha("Ingrese la fecha INICIAL del rango:");
+    int fechaFin = PedirFecha("Ingrese la fecha FINAL del rango:");
+
+    // Por si el usuario las mete al reves, las intercambiamos
+    if(fechaInicio > fechaFin){
+        int temp = fechaInicio;
+        fechaInicio = fechaFin;
+        fechaFin = temp;
+    }
+
+    printf("\n");
+    bool encontrada = false;
+    Sventa *v = asociado->pventas;
+    while(v){
+        if(v->fecha >= fechaInicio && v->fecha <= fechaFin){
+            MostrarVenta(v, ListaAsociados, ListaProductos);
+            encontrada = true;
+        }
+        v = v->prventas;
+    }
+
+    if(!encontrada){
+        printf("No se encontraron ventas de %s en ese rango de fechas.\n", asociado->nombre);
+    }
+}
+
 int main(){
     int menu=1;
     int option=1;
@@ -1343,7 +1399,8 @@ int main(){
                     }
                     case 4: {
                         system("cls");
-                        printf("Opcion en desarrollo (proxima entrega). \n");
+                        MostrarVentasEntreFechasPorVendedor(ListaAsociados, ListaProductos);
+                        printf("\n");
                         system("pause");
                         break;
                     }
