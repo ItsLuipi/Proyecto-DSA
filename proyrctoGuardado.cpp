@@ -400,10 +400,24 @@ void ModificarCodigoAsociado(Sasociado *nodoAModificar, Sasociado *cabezaLista){
 void EliminarPorCodigoAsociado(Sasociado **a, int n){
     Sasociado *aux;
     Sasociado *t;
+    int confirmar;
     if((*a)->codigo==n){
-        aux=*a;
-        *a=(*a)->pnext;
-        delete aux;
+        while(getchar() != '\n');
+        printf("\nEsta seguro que desea eliminar esta venta? (1 = Si, 0 = No): ");
+        while(scanf("%d", &confirmar) != 1){
+            printf("Opcion invalida, por favor intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        while(getchar() != '\n');
+
+        if(confirmar == 1){
+            aux=*a;
+            *a=(*a)->pnext;
+            delete aux;
+            printf("\nEl producto fue eliminada con exito!\n");   
+            }else {
+                printf("\nOperacion cancelada, la venta no fue eliminada.\n");
+            }
     }
     else{
         aux=*a;
@@ -411,16 +425,27 @@ void EliminarPorCodigoAsociado(Sasociado **a, int n){
             aux=aux->pnext;
         }
             if(aux->pnext!=NULL){
-                t=aux->pnext;
-                aux->pnext=t->pnext;
-                delete t;
-                printf("El codigo fue eliminado con exito!");
-            }
-            else{
+                    while(getchar() != '\n');
+                    printf("\nEsta seguro que desea eliminar esta venta? (1 = Si, 0 = No): ");
+                    while(scanf("%d", &confirmar) != 1){
+                        printf("Opcion invalida, por favor intente de nuevo: ");
+                        while(getchar() != '\n');
+                    }
+                    while(getchar() != '\n');
+
+                    if(confirmar == 1){
+                        t=aux->pnext;
+                        aux->pnext=t->pnext;
+                        delete t;
+                        printf("\nEl producto fue eliminada con exito!\n");   
+                    }else {
+                        printf("\nOperacion cancelada, la venta no fue eliminada.\n");
+                    }
+            } else {
                 printf("El codigo no esta en la lista");
             }
+        }
     }
-}
 
 void MostrarAsociados(Sasociado *lista){
     while(lista){
@@ -1489,13 +1514,11 @@ int main(){
                     system("cls");  
                     printf("Que codigo desea eliminar?: ");
                     while (scanf("%d", &codigo) != 1) {
-                        printf("El codigo es invalido, porfavor intente de nuevo. \n");
                         while (getchar() != '\n');
                         ("%d", &codigo);
                     }
                     EliminarPorCodigoAsociado(&ListaAsociados, codigo);
 					GuardarAsociados(ListaAsociados);
-                    printf("El codigo fue eliminado con exito!");
                     printf("\n");
                     system("pause");
                     break;
