@@ -10,12 +10,21 @@ struct Sventa {
     int codigo_producto;     // enlaza con Sproducto->codigo
     int codigo_asociado;     // enlaza con Sasociado->codigo (vendedor)
     int cantidad;
+<<<<<<< Updated upstream
     float precio_unidad;
     float monto_total;
     int fecha;                // formato AAAAMMDD (ej: 20260718) -> se puede comparar como numero
+=======
+    int fecha;  
+    int codigo_asociado;       
+>>>>>>> Stashed changes
     
     struct Sventa* prventas; 
 };
+
+struct Sasociado; //Escribimos esto porque aun no esta definido ExisteAsociado en este punto y el programa explota
+
+Sasociado* ExisteAsociado(Sasociado *lista, int n); //Esto se declara antes porque lo necesita NuevaVenta
 
 struct Sasociado {
     int codigo;              
@@ -60,6 +69,21 @@ bool BuscarCodigoAsociado(Sasociado *lista, int codigo){
                 return false;
             }
             else{lista=lista->pnext;}
+        }
+        return true;
+    }
+}
+
+bool BuscarNumOperacion(Sventa *lista, int codigo){
+    if(!(lista)){
+        return true;
+    }
+    else{
+        while(lista){
+            if(lista->num_operacion == codigo){
+                return false;
+            }
+            else{lista = lista->prventas;}
         }
         return true;
     }
@@ -174,6 +198,155 @@ void CargarAsociados(Sasociado **lista) {
         }
     }
     fclose(f);
+}
+
+void GuardarVentas(Sventa *lista){
+	FILE *f = fopen("ventas.txt", "w");
+	if(!f) {
+		printf("Error al abrir ventas.txt \n");
+		return;
+	}
+	while(lista) {
+		fprintf(f, "%d|%s|%d|%d|%d\n",
+			lista->num_operacion,
+			lista->producto,
+			lista->cantidad,
+			lista->fecha,
+			lista->codigo_asociado);
+		lista=lista->prventas;
+	}
+	fclose(f);
+}
+
+void CargarVentas(Sventa **lista) {
+	FILE *f = fopen("ventas.txt", "r");
+	if(!f) {return;}
+	while(1) {
+		Sventa *nuevo = new Sventa;
+		if (fscanf(f, "%d|%49[^|]|%d|%d|%d\n",
+			&nuevo->num_operacion,
+			nuevo->producto,
+			&nuevo->cantidad,
+			&nuevo->fecha,
+			&nuevo->codigo_asociado) == 5) {
+			nuevo->prventas = *lista;
+			*lista = nuevo;
+		}
+		else{
+			delete nuevo;
+			break;
+		}
+	}
+	fclose(f);
+}
+
+//============================VENTAS============================
+
+Sventa* NuevaVenta(Sventa *ListaVentas, Sasociado *ListaAsociados){
+    Sventa *nuevo = new Sventa;
+    int num_operacion;
+    int codigoAsociado;
+    char producto[50];
+    int cantidad;
+
+    printf("Ingrese el numero de operacion: ");
+    while(scanf("%d", &num_operacion) != 1){
+        printf("El numero de operacion es invalido, por favor intente de nuevo.\n");
+        while(getchar() != '\n');
+    }
+    while(!(BuscarNumOperacion(ListaVentas, num_operacion))){
+        printf("Ese numero de operacion ya existe, por favor introduzca uno distinto: ");
+        fflush(stdin); scanf("%d", &num_operacion); fflush(stdin);
+    }
+    nuevo->num_operacion = num_operacion;
+
+    printf("Ingrese el codigo del asociado que realiza la venta: ");
+    fflush(stdin); scanf("%d", &codigoAsociado); fflush(stdin);
+    while(ExisteAsociado(ListaAsociados, codigoAsociado) == NULL){
+        printf("No existe un asociado con ese codigo, intente de nuevo: ");
+        fflush(stdin); scanf("%d", &codigoAsociado); fflush(stdin);
+    }
+    nuevo->codigo_asociado = codigoAsociado;
+
+    printf("Ingrese el nombre del producto vendido (maximo 49 caracteres): \n");
+    fflush(stdin); scanf(" %49[^\n]", producto); fflush(stdin);
+    strcpy(nuevo->producto, producto);
+
+    printf("Ingrese la cantidad vendida: ");
+    fflush(stdin); scanf("%d", &cantidad); fflush(stdin);
+    while(cantidad <= 0){
+        printf("La cantidad debe ser mayor a 0, intente de nuevo: ");
+        fflush(stdin); scanf("%d", &cantidad); fflush(stdin);
+    }
+    nuevo->cantidad = cantidad;
+
+    printf("Ahora ingrese la fecha de la venta:\n");
+    //nuevo->fecha = LeerFecha();  No tenemos esta funcion todavia
+
+    nuevo->prventas = NULL;
+    return nuevo;
+}
+
+Sventa* ExisteVenta(Sventa *lista, int n){
+    Sventa* ax = lista;
+    while(ax && ax->num_operacion !=n){
+        ax = ax->prventas;
+    }
+    return ax;
+}
+
+void AgregarVenta(Sventa **lista, Sventa **venta){
+    (*venta)->prventas = *lista;
+    *lista = *venta;
+    printf("Venta agregada con exito!");
+}
+
+void MostrarVenta(Sventa *v){
+    if(!v) return;
+    char fechaTexto[11];
+    //FechaATexto(v->fecha, fechaTexto); Hay que revisar bien lo de la fecha
+    printf("N. Operacion: %d | Producto: %s | Cantidad: %d | Fecha: %s | Codigo Asociado: %d\n",
+        v->num_operacion, v->producto, v->cantidad, fechaTexto, v->codigo_asociado);
+}
+
+void ConsultarNumOperacion(Sventa *lista, int n){
+    if(!lista){
+        printf("No hay ventas en la lista\n");
+    }
+    while(lista && lista->num_operacion != n){
+        lista = lista->prventas;
+    }
+    if(lista){
+        MostrarVenta(lista);
+    }
+    else{
+        printf("No se encontro ninguna venta con ese numero de operacion\n");
+    }
+}
+
+void EliminarPorNumOperacion(Sventa **a, int n){
+    Sventa *aux;
+    Sventa *t;
+    if((*a)->num_operacion==n){
+        aux=*a;
+        *a=(*a)->prventas;
+        delete aux;
+    }
+    else {
+        aux=*a;
+        while(aux->prventas && aux->prventas->num_operacion !=n){
+        aux=aux->prventas;
+    }
+    if(aux->prventas!=NULL){
+        t=aux->prventas;
+        aux->prventas=t->prventas;
+        delete t;
+        printf("La venta fue eliminada con exito!");
+    }
+    else{
+        printf("No se encontro ninguna venta con ese numero de operacion");
+    }
+    }
 }
 
 //============================ASOCIADOS============================
@@ -1113,22 +1286,30 @@ int main(){
     int CodigoAsociados;
     Sproducto* ListaProductos=NULL;
     Sasociado* ListaAsociados=NULL;
+    Sventa* ListaVentas=NULL;
 	Sproducto* prueba;
     Sasociado* pruebasociado;
 	CargarProductos(&ListaProductos);
 	CargarAsociados(&ListaAsociados);
+<<<<<<< Updated upstream
 	CargarVentas(ListaAsociados);
+=======
+    CargarVentas(&ListaVentas);
+>>>>>>> Stashed changes
     while (menu!=0){
-    system("cls");
-    printf("\n\n\t\tSistema de ventas DirVen\n\n");  
-    printf("1. Asociados \n");  
-    printf("2. Productos \n"); 
-    printf("3. Ventas \n");  
-    printf("\n0. Salir\n");  
-    if (scanf("%d", &menu) != 1) {
-            menu = -1; 
-    }
-    while (getchar() != '\n');
+        system("cls");
+        printf("\n\n\t\tSistema de ventas DirVen\n\n");  
+        printf("1. Asociados \n");  
+        printf("2. Productos \n"); 
+        printf("3. Ventas \n");
+        printf("4. Reportes \n");  
+        printf("\n0. Salir\n");  
+        if (scanf("%d", &menu) != 1) {
+                menu = -1; 
+        }
+        while (getchar() != '\n');
+    
+
 //======================================MENU ASOCIADOS======================================
     switch (menu){
         case 0: {
@@ -1197,9 +1378,15 @@ int main(){
                     system("cls");  
                     printf("Que codigo deseas modificar: ");
                     while (scanf("%d", &codigo) != 1) {
+<<<<<<< Updated upstream
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
                         scanf("%d", &codigo);
                         while (getchar() != '\n') {}; //Corregido el problema del buffer al insertar el codigo
+=======
+                        printf("El codigo es invalido, porfavor intente de nuevo. \n");                       
+                        scanf("%d", &codigo);
+                        while (getchar() != '\n');// Corregido: te faltaba el scanf aquí abajo
+>>>>>>> Stashed changes
                     }
                     pruebasociado=ExisteAsociado(ListaAsociados, codigo);
                     if(pruebasociado != NULL){
@@ -1226,11 +1413,12 @@ int main(){
                     printf("\n");
                     system("pause");
                     break;
-                }
+                };
                 case 6: {
                     system("cls");  
                     MostrarAsociados(ListaAsociados);
                     printf("\n");
+                    printf("Estos son todos los asociados cargados");
                     system("pause");
                     break;
                 }
@@ -1245,6 +1433,10 @@ int main(){
         }
         option=-1;
         break;
+    
+
+
+
         
 //======================================MENU PRODUCTOS======================================
         case 2: 
@@ -1309,8 +1501,13 @@ int main(){
                     printf("Que codigo deseas modificar: ");
                     while (scanf("%d", &codigo) != 1) {
                         printf("El codigo es invalido, porfavor intente de nuevo. \n");
+<<<<<<< Updated upstream
                         scanf(" %d", &codigo);
                         while (getchar() != '\n') {}; //Corregido el problema del buffer al insertar el codigo
+=======
+                        scanf("%d", &codigo);
+                        while (getchar() != '\n');
+>>>>>>> Stashed changes
                     }
                     prueba = ExisteProducto(ListaProductos, codigo);
                     if(prueba != NULL){
@@ -1357,6 +1554,7 @@ int main(){
         option=-1;
         break;
 //======================================MENU VENTAS======================================
+<<<<<<< Updated upstream
 //======================================MENU VENTAS======================================
         case 3: {
             int opcionVentas = 1;
@@ -1413,15 +1611,91 @@ int main(){
                 }
             }
             option = -1;
+=======
+case 3: {
+        while (option!=0){
+        system("cls");
+        printf("\n\n3.1 Agregar venta \n");
+        printf("3.2 Consultar por numero de operacion \n");
+        printf("3.3 Eliminar venta (por numero de operacion) \n");
+        printf("3.4 Mostrar todas las ventas entre dos fechas \n");
+        printf("3.0 Salir \n");
+        fflush(stdin);
+        if (scanf("%d", &option) != 1) {
+            option = -1; 
+        }
+        while (getchar() != '\n');
+            switch(option){
+                case 0: {
+                    break;
+                }
+                case 1: {
+                    system("cls");
+                    Sventa* NewVenta=NuevaVenta(ListaVentas, ListaAsociados);
+                    AgregarVenta(&ListaVentas, &NewVenta);
+					GuardarVentas(ListaVentas);
+                    printf("\n");
+                    system("pause");
+                    break;
+                } //Falta la funcion de nueva venta
+                case 2: {
+                    int numOperacion;
+                    system("cls");
+                    printf("Introduzca el numero de operacion que desea consultar: ");
+                    fflush(stdin);scanf("%d", &numOperacion);fflush(stdin);
+                    ConsultarNumOperacion(ListaVentas, numOperacion);
+                    printf("\n");
+                    system("pause");
+                    break;
+                }
+                case 3: {
+                    int numOperacion;
+                    system("cls");
+                    printf("Introduzca el numero de operacion que desea eliminar: ");
+                    fflush(stdin);scanf("%d", &numOperacion);fflush(stdin);
+                    EliminarPorNumOperacion(&ListaVentas, numOperacion);
+                    GuardarVentas(ListaVentas);
+                    printf("La venta fue eliminada con exito!");
+                    printf("\n");
+                    system("pause");
+                    break;
+                }
+                case 4: {
+                    system("cls");
+                    int fechaInicio, fechaFin, orden;
+                    printf("Fecha de inicio del rango:\n");
+                    /*fechaInicio = LeerFecha();
+                    printf("Fecha final del rango:\n");
+                    fechaFin = LeerFecha();
+                    printf("Como desea ordenar? 1- Mas nuevo primero  2- Mas antiguo primero: ");
+                    fflush(stdin);scanf("%d", &orden);fflush(stdin);
+                    MostrarVentasEntreFechas(ListaVentas, fechaInicio, fechaFin, orden==1);*/
+                    printf("\n");
+                    system("pause");
+                    break;
+                }
+                default: {
+                    system("cls");
+                    printf("Por favor introduzca una opcion valida. ");
+                    printf("\n");
+                    system("pause");
+                    break;
+                }
+>>>>>>> Stashed changes
             break;
+            }
+        }
+        option=-1;
+        break;
         }
         default: {
             system("cls");
             printf("Por favor introduzca una opcion valida. SKIBIDI. \n");
             system("pause");
             break; 
-        }
+            }
         }
     }
     return 0;
 }
+
