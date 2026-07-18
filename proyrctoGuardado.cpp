@@ -175,11 +175,12 @@ void CargarAsociados(Sasociado **lista) {
     fclose(f);
 }
 
-//============================ASOCIADOS============================
+//============================ASOCIADOS============================1
+
 void AgregarAsociados(Sasociado **lista, Sasociado** asociado){
         (*asociado)->pnext=*lista;
         *lista=*asociado;
-        printf("Codigo agregado con exito!");
+        printf("Asociado agregado con exito!");
 }
 
 Sasociado* NuevoAsociado(Sasociado *ListaAsociados){
@@ -486,7 +487,7 @@ Sproducto* NuevoProducto(Sproducto *ListaProductos){
 void AgregarProductos(Sproducto **lista, Sproducto** producto){
         (*producto)->psig=*lista;
         *lista=*producto;
-        printf("Codigo agregado con exito!");
+        printf("Producto agregado con exito!");
 }
 
 void MostrarProductos(Sproducto *lista){
@@ -643,11 +644,24 @@ void ModificarCodigo(Sproducto *nodoAModificar, Sproducto *cabezaLista){
 void EliminarPorCodigo(Sproducto **a, int n){
     Sproducto *aux;
     Sproducto *t;
+    int confirmar;
     if((*a)->codigo==n){
-        aux=*a;
-        *a=(*a)->psig;
-        printf("El codigo fue eliminado con exito!\n"); 
-        delete aux;
+        while(getchar() != '\n');
+        printf("\nEsta seguro que desea eliminar esta venta? (1 = Si, 0 = No): ");
+        while(scanf("%d", &confirmar) != 1){
+            printf("Opcion invalida, por favor intente de nuevo: ");
+            while(getchar() != '\n');
+        }
+        while(getchar() != '\n');
+
+        if(confirmar == 1){
+            aux=*a;
+            *a=(*a)->psig;
+            delete aux;
+            printf("\nEl producto fue eliminada con exito!\n");   
+            }else {
+                printf("\nOperacion cancelada, la venta no fue eliminada.\n");
+            }
     }
     else{
         aux=*a;
@@ -655,16 +669,29 @@ void EliminarPorCodigo(Sproducto **a, int n){
             aux=aux->psig;
         }
             if(aux->psig!=NULL){
-                t=aux->psig;
-                aux->psig=t->psig;
-                delete t;
-                printf("El codigo fue eliminado con exito!");
-            }
-            else{
+                    while(getchar() != '\n');
+                    printf("\nEsta seguro que desea eliminar esta venta? (1 = Si, 0 = No): ");
+                    while(scanf("%d", &confirmar) != 1){
+                        printf("Opcion invalida, por favor intente de nuevo: ");
+                        while(getchar() != '\n');
+                    }
+                    while(getchar() != '\n');
+
+                    if(confirmar == 1){
+                        t=aux->psig;
+                        aux->psig=t->psig;
+                        delete t;
+                        printf("\nEl producto fue eliminada con exito!\n");   
+                    }else {
+                        printf("\nOperacion cancelada, la venta no fue eliminada.\n");
+                    }
+            } else {
                 printf("El codigo no esta en la lista");
             }
+        }
     }
-}
+
+
 
 
 //============================VENTAS============================
@@ -938,8 +965,7 @@ void AgregarVenta(Sasociado *ListaAsociados, Sproducto *ListaProductos){
     }
 }
 
-// Busca una venta por su numero de operacion, recorriendo todos los
-// asociados y, dentro de cada uno, todas sus ventas
+
 Sventa* BuscarVentaPorOperacion(Sasociado *ListaAsociados, int numOperacion){
     Sasociado *a = ListaAsociados;
     while(a){
