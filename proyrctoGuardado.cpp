@@ -1733,7 +1733,7 @@ int main(){
         }
         default: {
             system("cls");
-            printf("Por favor introduzca una opcion valida. SKIBIDI. \n");
+            printf("Por favor introduzca una opcion valida. \n");
             system("pause");
             break; 
         }
